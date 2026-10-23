@@ -1,4 +1,4 @@
-import type { ChatTurn } from './types';
+import type { ChatTurn, ProviderConfig } from './types';
 
 // Finished summaries and follow-ups, per video, for the rest of the browser
 // session: reopening the popup shows them at once instead of asking the model
@@ -11,8 +11,8 @@ interface Entry {
 
 const key = (videoId: string) => `summary:${videoId}`;
 
-export function fingerprint(provider: string, language: string, instruction: string): string {
-  return JSON.stringify([provider, language, instruction]);
+export function fingerprint(provider: string, config: ProviderConfig, language: string, instruction: string): string {
+  return JSON.stringify([`${provider}/${config.agent}/${config.model}/${config.effort}`, language, instruction]);
 }
 
 export async function loadConversation(videoId: string, print: string): Promise<ChatTurn[] | null> {

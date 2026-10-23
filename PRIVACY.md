@@ -36,7 +36,10 @@ transcript, title, channel name and length, your instruction, and your
 follow-up questions. Nothing else is sent, and nothing goes to the developer.
 
 - **Chrome's built-in AI** (the default) runs on your device. Chrome downloads
-  its model once, after you turn summaries on.
+  its model once, after you turn summaries on. If you choose so in the
+  settings, it also loads the model or writes the summary when a video stays
+  open for a few seconds, before you open the popup. That too stays on your
+  device.
 - **A coding agent on your computer** (Claude Code, Codex or Gemini CLI) is
   reached through the BetterYouTube connector, a small program you install
   yourself. The agent then talks to its own service under your account, as it
@@ -55,6 +58,8 @@ You can turn summaries off in the popup's General tab.
 ## Permissions
 
 - `storage`: to save your settings and API keys.
+- `offscreen` (Chrome): to run the built-in AI while the popup is closed,
+  only when you ask for summaries to be prepared in advance.
 - `nativeMessaging` (optional, asked for only when you connect a coding agent):
   to talk to the BetterYouTube connector.
 - Access to `https://www.youtube.com/*` through its content scripts. It does

@@ -91,12 +91,26 @@ export default defineContentScript({
     };
     browser.runtime.onMessage.addListener(onMessage);
 
+    // Tells the background script which video is open, so it can get the
+    // built-in model ready when the viewer asked for that.
+    let lastVideo: string | null = null;
+    const onNavigate = () => {
+      const videoId = location.pathname === '/watch' ? new URLSearchParams(location.search).get('v') : null;
+      if (!videoId || videoId === lastVideo) return;
+      lastVideo = videoId;
+      const message: RuntimeMessage = { type: 'video-opened', videoId };
+      browser.runtime.sendMessage(message).catch(() => {});
+    };
+    onNavigate();
+    document.addEventListener('yt-navigate-finish', onNavigate);
+
     ctx.onInvalidated(() => {
       stopWatching();
       document.removeEventListener(HELLO_EVENT, onHello);
       document.removeEventListener(STATS_EVENT, onStats);
       document.removeEventListener(RESPONSE_EVENT, onResponse);
       browser.runtime.onMessage.removeListener(onMessage);
+      document.removeEventListener('yt-navigate-finish', onNavigate);
     });
   },
 });

@@ -28,7 +28,8 @@ Website and live demo: <https://mekedron.github.io/BetterYouTube/>
   viewer picks who writes it:
   - Chrome's built-in AI (Gemini Nano), the default: on the device, no key, a
     one-time model download; writes in English, Spanish, Japanese, German or
-    French.
+    French. Optionally it loads the model, or writes the summary, as soon as a
+    video stays open for 3 seconds.
   - A coding agent already on the computer (Claude Code, Codex, Gemini CLI)
     through the connector in `docs/connector/`, installed with one command.
   - A cloud API with the viewer's own key: OpenAI, Anthropic, Google Gemini,

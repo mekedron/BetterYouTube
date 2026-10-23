@@ -24,6 +24,12 @@ export interface Settings {
     prompt: string;
     /** Start the summary as soon as the popup opens on a video. */
     autoSummarize: boolean;
+    /**
+     * What Chrome's built-in model does when a video stays open for a few
+     * seconds: nothing, load itself into memory, or write the summary so the
+     * popup opens with it ready. See components/ai/prepare.ts.
+     */
+    prepare: 'off' | 'model' | 'summary';
     /** Per-provider choices. API keys are not here; see components/ai/secrets.ts. */
     providers: Record<'chrome-builtin' | 'agent' | 'openai' | 'anthropic' | 'gemini' | 'openrouter' | 'custom', ProviderSettings>;
   };
@@ -56,6 +62,7 @@ export const DEFAULT_SETTINGS: Settings = {
     language: 'auto',
     prompt: '',
     autoSummarize: true,
+    prepare: 'off',
     providers: {
       'chrome-builtin': PROVIDER_DEFAULTS,
       // Haiku answers a summary in about a second through Claude Code.
@@ -96,6 +103,7 @@ export function normalizeSettings(saved: unknown): Settings {
   const s = mergeInto(DEFAULT_SETTINGS, saved);
   if (s.feed.action !== 'dim' && s.feed.action !== 'hide') s.feed.action = 'dim';
   if (!['unasked', 'granted', 'declined'].includes(s.ai.consent)) s.ai.consent = 'unasked';
+  if (!['off', 'model', 'summary'].includes(s.ai.prepare)) s.ai.prepare = 'off';
   return s;
 }
 

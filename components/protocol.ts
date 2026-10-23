@@ -72,4 +72,6 @@ export type RuntimeMessage =
   | { type: 'get-tab-stats' }
   | { type: 'tab-stats'; stats: TabStats }
   | { type: 'clear-channel-cache' }
-  | { type: 'get-video-context' };
+  | { type: 'get-video-context' }
+  | { type: 'video-opened'; videoId: string }
+  | { type: 'summary-started'; videoId: string };

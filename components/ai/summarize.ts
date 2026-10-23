@@ -32,7 +32,7 @@ function languageName(code: string): string {
   }
 }
 
-function systemPrompt(language: string): string {
+export function systemPrompt(language: string): string {
   return (
     'You summarize YouTube videos from their transcripts. Be concrete. ' +
     'Start with the answer itself, with no introduction or closing remarks. ' +

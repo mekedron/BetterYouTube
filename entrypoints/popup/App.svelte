@@ -313,6 +313,21 @@
                 <input type="checkbox" bind:checked={settings.ai.autoSummarize} />
                 <span>{t('aiAutoTitle')}</span>
               </label>
+              {#if aiProvider.id === 'chrome-builtin'}
+                <div class="field">
+                  <span>{t('aiPrepareTitle')}</span>
+                  <select bind:value={settings.ai.prepare}>
+                    <option value="off">{t('aiPrepareOff')}</option>
+                    <option value="model">{t('aiPrepareModel')}</option>
+                    <option value="summary">{t('aiPrepareSummary')}</option>
+                  </select>
+                </div>
+                {#if settings.ai.prepare !== 'off'}
+                  <div class="hint">
+                    {settings.ai.prepare === 'model' ? t('aiPrepareModelHint') : t('aiPrepareSummaryHint')}
+                  </div>
+                {/if}
+              {/if}
               <div class="prompt">
                 <div class="prompt-head">
                   <span>{t('aiPromptTitle')}</span>

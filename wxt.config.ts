@@ -11,7 +11,9 @@ export default defineConfig({
     // Settings only. The content scripts reach youtube.com through their
     // `matches`, and the AI APIs answer extensions' cross-origin requests,
     // so no host permission is requested.
-    permissions: ['storage'],
+    // `offscreen` (Chrome only) runs the built-in model while the popup is
+    // closed, when the viewer asks for summaries to be prepared in advance.
+    permissions: browser === 'firefox' ? ['storage'] : ['storage', 'offscreen'],
     // Asked for only when the viewer connects a coding agent on their
     // computer (see components/ai/connector.ts).
     optional_permissions: ['nativeMessaging'],

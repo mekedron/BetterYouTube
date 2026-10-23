@@ -340,5 +340,23 @@
   },
   "agentStillFailing": {
     "message": "Still the same. If you just ran the command, close this popup and open it again."
+  },
+  "aiPrepareTitle": {
+    "message": "When a video opens"
+  },
+  "aiPrepareOff": {
+    "message": "Do nothing"
+  },
+  "aiPrepareModel": {
+    "message": "Load the model"
+  },
+  "aiPrepareSummary": {
+    "message": "Write the summary"
+  },
+  "aiPrepareModelHint": {
+    "message": "After a video stays open for 3 seconds, Chrome loads the model into memory, so a summary starts without that wait. The model still reads the transcript when you open the popup."
+  },
+  "aiPrepareSummaryHint": {
+    "message": "After a video stays open for 3 seconds, the model writes its summary, and the popup opens with it ready. The model then works on every video you stay on, even when you don't need a summary."
   }
 }

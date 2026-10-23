@@ -3,6 +3,7 @@
   import { fingerprint, forgetConversation, loadConversation, saveConversation } from '../../components/ai/cache';
   import { detectAgents, hasConnectorPermission } from '../../components/ai/connector';
   import { AGENT_NAMES, providerLabel } from '../../components/ai/labels';
+  import { preparedStatus } from '../../components/ai/prepare';
   import { getProvider, providerConfig, resolveLanguage } from '../../components/ai/providers';
   import { Conversation, DEFAULT_INSTRUCTION } from '../../components/ai/summarize';
   import type { Stage } from '../../components/ai/summarize';
@@ -31,9 +32,7 @@
   const language = $derived(resolveLanguage(provider, settings.ai.language, browser.i18n.getUILanguage()));
   const instruction = $derived(settings.ai.prompt.trim() || DEFAULT_INSTRUCTION);
   const config = $derived(providerConfig(settings, keys, provider.id));
-  const print = $derived(
-    fingerprint(`${provider.id}/${config.agent}/${config.model}/${config.effort}`, language, instruction),
-  );
+  const print = $derived(fingerprint(provider.id, config, language, instruction));
   // Agents the connector already found, to mention them on the first-run card.
   let foundAgents = $state<string[]>([]);
   void hasConnectorPermission().then(async (granted) => {
@@ -95,13 +94,35 @@
     history = [];
     error = '';
     status = await provider.status(language, config);
-    const saved = await loadConversation(id, print);
+    const saved = (await loadConversation(id, print)) ?? (await followPrepared(id));
     if (saved) {
       history = saved;
       conversation = Conversation.restore(options(), saved);
     } else if (settings.ai.consent === 'granted' && settings.ai.autoSummarize && status === 'ready') {
       void run();
     }
+  }
+
+  // Shows a summary the offscreen document is writing for this video (see
+  // components/ai/prepare.ts) as it grows, and returns it once finished.
+  // Closing the popup leaves that run going; it lands in the cache.
+  async function followPrepared(id: string): Promise<ChatTurn[] | null> {
+    let prepared = await preparedStatus(id, print);
+    if (prepared?.state !== 'running') return prepared?.state === 'done' ? prepared.history : null;
+    running = true;
+    try {
+      while (prepared?.state === 'running' && !abort.signal.aborted) {
+        streaming = prepared.text;
+        stage = prepared.stage;
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        prepared = await preparedStatus(id, print);
+      }
+    } finally {
+      streaming = '';
+      stage = null;
+      running = false;
+    }
+    return prepared?.state === 'done' ? prepared.history : null;
   }
 
   async function run() {
@@ -111,6 +132,7 @@
     error = '';
     streaming = '';
     stage = { kind: 'reading' };
+    browser.runtime.sendMessage({ type: 'summary-started', videoId: id } satisfies RuntimeMessage).catch(() => {});
     try {
       const message: RuntimeMessage = { type: 'get-video-context' };
       const response = (await browser.tabs.sendMessage(tabId, message)) as PageResponse | undefined;
