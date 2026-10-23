@@ -4,14 +4,14 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   modules: ['@wxt-dev/module-svelte'],
   manifest: ({ browser }) => ({
-    name: 'BetterYouTube',
+    name: 'BetterYouTube – Slop Filter',
     description: '__MSG_extDescription__',
     default_locale: 'en',
     homepage_url: 'https://mekedron.github.io/BetterYouTube/',
     // Settings only. The content scripts reach youtube.com through their
     // `matches`, so no host permission is requested.
     permissions: ['storage'],
-    action: { default_title: 'BetterYouTube' },
+    action: { default_title: 'BetterYouTube – Slop Filter' },
     // Firefox runs the page-world content script (world: MAIN) from 128 on,
     // and requires the data-collection declaration for new add-ons.
     ...(browser === 'firefox'

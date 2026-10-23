@@ -2,7 +2,7 @@
   <img src="public/icon/128.png" alt="BetterYouTube icon" width="128" height="128" />
 </p>
 
-# BetterYouTube
+# BetterYouTube – Slop Filter
 
 It's not your attention span. It's the padding.
 
