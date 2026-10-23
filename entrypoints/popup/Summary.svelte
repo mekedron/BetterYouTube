@@ -1,9 +1,12 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { fingerprint, forgetConversation, loadConversation, saveConversation } from '../../components/ai/cache';
-  import { getProvider, resolveLanguage } from '../../components/ai/providers';
+  import { detectAgents, hasConnectorPermission } from '../../components/ai/connector';
+  import { AGENT_NAMES, providerLabel } from '../../components/ai/labels';
+  import { getProvider, providerConfig, resolveLanguage } from '../../components/ai/providers';
   import { Conversation, DEFAULT_INSTRUCTION } from '../../components/ai/summarize';
   import type { Stage } from '../../components/ai/summarize';
+  import { ProviderError } from '../../components/ai/types';
   import type { ChatTurn, ProviderStatus } from '../../components/ai/types';
   import { t } from '../../components/format';
   import { renderMarkdown } from '../../components/markdown';
@@ -12,14 +15,32 @@
 
   let {
     settings = $bindable(),
+    keys,
     tabId,
     videoId,
-  }: { settings: Settings; tabId: number | undefined; videoId: string | null } = $props();
+    onOpenSettings,
+  }: {
+    settings: Settings;
+    keys: Record<string, string>;
+    tabId: number | undefined;
+    videoId: string | null;
+    onOpenSettings: () => void;
+  } = $props();
 
   const provider = $derived(getProvider(settings.ai.provider));
   const language = $derived(resolveLanguage(provider, settings.ai.language, browser.i18n.getUILanguage()));
   const instruction = $derived(settings.ai.prompt.trim() || DEFAULT_INSTRUCTION);
-  const print = $derived(fingerprint(provider.id, language, instruction));
+  const config = $derived(providerConfig(settings, keys, provider.id));
+  const print = $derived(
+    fingerprint(`${provider.id}/${config.agent}/${config.model}/${config.effort}`, language, instruction),
+  );
+  // Agents the connector already found, to mention them on the first-run card.
+  let foundAgents = $state<string[]>([]);
+  void hasConnectorPermission().then(async (granted) => {
+    if (!granted) return;
+    const found = await detectAgents();
+    if (found.ok) foundAgents = found.agents.map((a) => AGENT_NAMES[a.id]);
+  });
 
   let status = $state<ProviderStatus | null>(null);
   let history = $state<ChatTurn[]>([]);
@@ -40,6 +61,7 @@
 
   const options = () => ({
     provider,
+    config,
     language,
     signal: abort.signal,
     // Chrome reports download progress on every new session, even with the
@@ -72,7 +94,7 @@
     conversation = null;
     history = [];
     error = '';
-    status = await provider.status(language);
+    status = await provider.status(language, config);
     const saved = await loadConversation(id, print);
     if (saved) {
       history = saved;
@@ -103,12 +125,17 @@
       await saveConversation(id, print, history);
       status = 'ready';
     } catch (e) {
-      if (!abort.signal.aborted) error = t('errModel');
+      if (!abort.signal.aborted) error = modelError(e);
     } finally {
       streaming = '';
       running = false;
       stage = null;
     }
+  }
+
+  // Provider errors carry the API's own words, such as an invalid key.
+  function modelError(e: unknown): string {
+    return e instanceof ProviderError ? `${t('errModel')} ${e.message}` : t('errModel');
   }
 
   async function ask(event: SubmitEvent) {
@@ -124,8 +151,8 @@
       for await (const chunk of conversation.ask(q)) streaming += chunk;
       history = conversation.history;
       await saveConversation(id, print, history);
-    } catch {
-      if (!abort.signal.aborted) error = t('errModel');
+    } catch (e) {
+      if (!abort.signal.aborted) error = modelError(e);
     } finally {
       pendingQuestion = '';
       streaming = '';
@@ -143,7 +170,8 @@
 
   function turnOn() {
     settings.ai.consent = 'granted';
-    void run();
+    if (status === 'ready' || status === 'needs-download') void run();
+    else onOpenSettings();
   }
 
   const stageText = $derived.by(() => {
@@ -158,15 +186,20 @@
 <div class="summary">
   {#if !videoId}
     <div class="card note">{t('notVideo')}</div>
-  {:else if status === 'unsupported'}
-    <div class="card note">{t('aiUnsupported')}</div>
   {:else if settings.ai.consent === 'unasked'}
     <div class="card intro">
       <div class="intro-title">{t('aiIntroTitle')}</div>
-      <p>{t('aiIntroText')}</p>
-      {#if status === 'needs-download'}<p class="muted">{t('aiIntroDownload')}</p>{/if}
+      {#if provider.id === 'chrome-builtin' && status !== 'unsupported'}
+        <p>{t('aiIntroText')}</p>
+        {#if status === 'needs-download'}<p class="muted">{t('aiIntroDownload')}</p>{/if}
+        {#if foundAgents.length}<p class="muted">{t('aiAlsoAgents', undefined, { list: foundAgents.join(', ') })}</p>{/if}
+      {:else}
+        <p>{t('aiIntroTextOther')}</p>
+      {/if}
       <div class="actions">
-        <button type="button" class="primary" onclick={turnOn}>{t('aiTurnOn')}</button>
+        <button type="button" class="primary" onclick={turnOn}>
+          {status === 'ready' || status === 'needs-download' ? t('aiTurnOn') : t('aiSetUp')}
+        </button>
         <button type="button" class="ghost" onclick={() => (settings.ai.consent = 'declined')}>{t('aiNotNow')}</button>
       </div>
     </div>
@@ -174,6 +207,11 @@
     <div class="card note">
       <p>{t('aiOff')}</p>
       <button type="button" class="ghost" onclick={turnOn}>{t('aiTurnOn')}</button>
+    </div>
+  {:else if status === 'needs-setup' || status === 'unsupported'}
+    <div class="card note">
+      <p>{status === 'unsupported' ? t('aiUnsupported') : t('aiNeedsSetup', undefined, { name: providerLabel(provider.id) })}</p>
+      <button type="button" class="ghost" onclick={onOpenSettings}>{t('aiOpenSettings')}</button>
     </div>
   {:else}
     <div class="card result" aria-live="polite">

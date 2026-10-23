@@ -24,9 +24,21 @@ export interface Settings {
     prompt: string;
     /** Start the summary as soon as the popup opens on a video. */
     autoSummarize: boolean;
+    /** Per-provider choices. API keys are not here; see components/ai/secrets.ts. */
+    providers: Record<'chrome-builtin' | 'agent' | 'openai' | 'anthropic' | 'gemini' | 'openrouter' | 'custom', ProviderSettings>;
   };
   badge: boolean;
 }
+
+export interface ProviderSettings {
+  /** Empty until the viewer picks one or the provider's default is filled in. */
+  model: string;
+  effort: 'default' | 'low' | 'medium' | 'high';
+  baseUrl: string;
+  agent: 'claude' | 'codex' | 'gemini';
+}
+
+const PROVIDER_DEFAULTS: ProviderSettings = { model: '', effort: 'default', baseUrl: '', agent: 'claude' };
 
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
@@ -38,7 +50,23 @@ export const DEFAULT_SETTINGS: Settings = {
     hideHomeShorts: true,
   },
   shorts: { enabled: true, minLikes: 1_000, skipHiddenLikes: true },
-  ai: { consent: 'unasked', provider: 'chrome-builtin', language: 'auto', prompt: '', autoSummarize: true },
+  ai: {
+    consent: 'unasked',
+    provider: 'chrome-builtin',
+    language: 'auto',
+    prompt: '',
+    autoSummarize: true,
+    providers: {
+      'chrome-builtin': PROVIDER_DEFAULTS,
+      // Haiku answers a summary in about a second through Claude Code.
+      agent: { ...PROVIDER_DEFAULTS, model: 'haiku', effort: 'low' },
+      openai: PROVIDER_DEFAULTS,
+      anthropic: PROVIDER_DEFAULTS,
+      gemini: PROVIDER_DEFAULTS,
+      openrouter: PROVIDER_DEFAULTS,
+      custom: { ...PROVIDER_DEFAULTS, baseUrl: 'http://127.0.0.1:11434/v1' },
+    },
+  },
   badge: true,
 };
 

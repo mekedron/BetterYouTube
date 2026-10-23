@@ -1,12 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { AUDIENCE_STEPS, LIKE_STEPS, t } from '../../components/format';
-  import { getProvider, resolveLanguage } from '../../components/ai/providers';
+  import { providerLabel } from '../../components/ai/labels';
+  import { COMMON_LANGUAGES, getProvider, PROVIDERS, resolveLanguage } from '../../components/ai/providers';
+  import { loadApiKeys } from '../../components/ai/secrets';
   import { DEFAULT_INSTRUCTION } from '../../components/ai/summarize';
   import type { RuntimeMessage, TabInfo } from '../../components/protocol';
   import { loadSettings, saveSettings } from '../../components/settings';
   import type { Settings } from '../../components/settings';
   import StepSlider from './StepSlider.svelte';
+  import ProviderSettings from './ProviderSettings.svelte';
   import Summary from './Summary.svelte';
   import Switch from './Switch.svelte';
 
@@ -15,6 +18,7 @@
   const version = browser.runtime.getManifest().version;
 
   let settings = $state<Settings | null>(null);
+  let keys = $state<Record<string, string>>({});
   // null: the active tab is not a YouTube page (or not loaded yet).
   let stats = $state<TabInfo | null>(null);
   let tabId = $state<number | undefined>();
@@ -112,6 +116,7 @@
   }
 
   onMount(() => {
+    loadApiKeys().then((loaded) => (keys = loaded));
     loadSettings().then((loaded) => {
       lastSaved = JSON.stringify(loaded);
       settings = loaded;
@@ -180,7 +185,7 @@
 
     {#if tab === 'summary'}
       <div role="tabpanel">
-        <Summary bind:settings {tabId} {videoId} />
+        <Summary bind:settings {keys} {tabId} {videoId} onOpenSettings={() => selectTab('general')} />
       </div>
     {:else}
     <div class="body" class:dimmed={!settings.enabled && tab !== 'general'} inert={!settings.enabled && tab !== 'general'} role="tabpanel">
@@ -288,14 +293,15 @@
               <div class="field">
                 <span>{t('aiProvider')}</span>
                 <select bind:value={settings.ai.provider}>
-                  <option value="chrome-builtin">{t('providerChromeBuiltin')}</option>
+                  {#each PROVIDERS as p (p.id)}<option value={p.id}>{providerLabel(p.id)}</option>{/each}
                 </select>
               </div>
+              <ProviderSettings bind:settings bind:keys />
               <div class="field">
                 <span>{t('aiLanguageTitle')}</span>
                 <select bind:value={settings.ai.language}>
                   <option value="auto">{t('aiLanguageAuto')}</option>
-                  {#each aiProvider.languages ?? [] as code (code)}
+                  {#each aiProvider.languages ?? COMMON_LANGUAGES as code (code)}
                     <option value={code}>{languageLabel(code)}</option>
                   {/each}
                 </select>

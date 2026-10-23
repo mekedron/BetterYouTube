@@ -33,11 +33,15 @@
           parent.postMessage({ type: 'byt-demo-settings', settings: stored }, '*');
         },
       },
+      local: { get: async () => ({}), set: async () => {} },
+      session: { get: async () => ({}), set: async () => {}, remove: async () => {} },
       onChanged: { addListener() {}, removeListener() {} },
     },
+    permissions: { contains: async () => false, request: async () => false },
     tabs: {
       query: async () => [{ id: 1 }],
-      sendMessage: async (_tabId, message) => (message?.type === 'get-tab-stats' ? stats : true),
+      // The demo has no video tab, so the popup shows its settings tabs only.
+      sendMessage: async (_tabId, message) => (message?.type === 'get-tab-stats' ? { ...stats, videoId: null } : true),
     },
   };
 })();

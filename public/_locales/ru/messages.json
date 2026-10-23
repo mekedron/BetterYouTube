@@ -214,5 +214,122 @@
   },
   "aiLanguageNote": {
     "message": "Встроенный AI Chrome пишет только на этих языках, поэтому для языка вашего браузера пересказ будет на английском."
+  },
+  "providerAgent": {
+    "message": "Агент на этом компьютере"
+  },
+  "providerOpenai": {
+    "message": "OpenAI"
+  },
+  "providerAnthropic": {
+    "message": "Anthropic (Claude)"
+  },
+  "providerGemini": {
+    "message": "Google Gemini"
+  },
+  "providerOpenrouter": {
+    "message": "OpenRouter"
+  },
+  "providerCustom": {
+    "message": "Сервер, совместимый с OpenAI"
+  },
+  "apiKey": {
+    "message": "Ключ API"
+  },
+  "apiKeyHint": {
+    "message": "Хранится только в этом браузере и отправляется только в {name}."
+  },
+  "getKey": {
+    "message": "Получить ключ"
+  },
+  "model": {
+    "message": "Модель"
+  },
+  "modelsLoading": {
+    "message": "Загружаю список моделей…"
+  },
+  "modelsFailed": {
+    "message": "Не удалось загрузить модели: {error}"
+  },
+  "modelPlaceholder": {
+    "message": "ID модели"
+  },
+  "effort": {
+    "message": "Усилие"
+  },
+  "effortDefault": {
+    "message": "Как у модели"
+  },
+  "effortLow": {
+    "message": "Низкое"
+  },
+  "effortMedium": {
+    "message": "Среднее"
+  },
+  "effortHigh": {
+    "message": "Высокое"
+  },
+  "effortHint": {
+    "message": "Чем выше усилие, тем дольше модель думает: медленнее и дороже."
+  },
+  "baseUrl": {
+    "message": "Адрес сервера"
+  },
+  "baseUrlHint": {
+    "message": "Например, Ollama: http://127.0.0.1:11434/v1"
+  },
+  "agentIntro": {
+    "message": "Используйте Claude Code, Codex или Gemini CLI, которые у вас уже есть. Они работают на вашем компьютере по вашей подписке, все их инструменты отключены."
+  },
+  "agentAllow": {
+    "message": "Разрешить подключение"
+  },
+  "agentInstall": {
+    "message": "Один раз установите посредника. Вставьте это в Терминал (macOS или Linux):"
+  },
+  "agentCopy": {
+    "message": "Копировать"
+  },
+  "agentCopied": {
+    "message": "Скопировано"
+  },
+  "agentCheck": {
+    "message": "Проверить снова"
+  },
+  "agentOutdated": {
+    "message": "Посредник устарел. Выполните ту же команду ещё раз, чтобы обновить его."
+  },
+  "agentNone": {
+    "message": "Посредник не нашёл агентов. Установите Claude Code, Codex или Gemini CLI и проверьте снова."
+  },
+  "agentFailed": {
+    "message": "Посредник не ответил: {error}"
+  },
+  "agentPick": {
+    "message": "Агент"
+  },
+  "builtinReady": {
+    "message": "Готов. Работает на вашем компьютере."
+  },
+  "builtinNeedsDownload": {
+    "message": "Chrome скачает модель при первом использовании, это несколько гигабайт."
+  },
+  "builtinUnsupported": {
+    "message": "Недоступен в этом браузере."
+  },
+  "aiNeedsSetup": {
+    "message": "Для пересказа остался один шаг: подключите «{name}» на вкладке «Общее»."
+  },
+  "aiOpenSettings": {
+    "message": "Открыть настройки"
+  },
+  "aiIntroTextOther": {
+    "message": "Подключите AI, чтобы получать краткий пересказ видео: агента, который у вас уже есть, например Claude Code или Codex, или ключ API от OpenAI, Anthropic, Google или OpenRouter."
+  },
+  "aiSetUp": {
+    "message": "Настроить"
+  },
+  "aiAlsoAgents": {
+    "message": "Ещё на вашем компьютере есть: {list}. Переключиться можно в настройках."
   }
 }

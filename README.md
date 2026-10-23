@@ -24,11 +24,15 @@ Website and live demo: <https://mekedron.github.io/BetterYouTube/>
   mutes and pauses a Short with fewer likes than you set (1K by default), so you
   scroll past it.
 - **Video summaries.** On a video page the popup gives a short summary of the
-  video from its transcript, and answers follow-up questions about it. Chrome's
-  built-in AI (Gemini Nano) writes it on your device, with no key or account.
-  The first use downloads the model. It writes in English, Spanish, Japanese,
-  German or French. Browsers without built-in AI, such as Firefox, show a note
-  instead.
+  video from its transcript, and answers follow-up questions about it. The
+  viewer picks who writes it:
+  - Chrome's built-in AI (Gemini Nano), the default: on the device, no key, a
+    one-time model download; writes in English, Spanish, Japanese, German or
+    French.
+  - A coding agent already on the computer (Claude Code, Codex, Gemini CLI)
+    through the connector in `docs/connector/`, installed with one command.
+  - A cloud API with the viewer's own key: OpenAI, Anthropic, Google Gemini,
+    OpenRouter, or any OpenAI-compatible server such as Ollama.
 - **Dim or hide**, per page area, with one switch to pause everything.
 - A count of filtered videos on the toolbar icon.
 - English and Russian; light and dark follow the system.
@@ -62,9 +66,12 @@ Summaries:
 - `components/ai/summarize.ts` builds the prompts and runs the summary and
   follow-ups. A transcript longer than the model's context window is read in
   parts, and the summary is written from the parts' notes.
-- `components/ai/types.ts` is the provider contract. `chromeBuiltin.ts` is the
-  only provider today; one for API keys or for local coding agents is a new
-  file registered in `components/ai/providers.ts`.
+- `components/ai/types.ts` is the provider contract; `providers.ts` lists the
+  providers. `chromeBuiltin.ts` is the on-device model, `apiProviders.ts` the
+  cloud APIs (called straight from the extension; they all allow it), and
+  `connector.ts` the coding agents through the native-messaging connector
+  (`docs/connector/`, protocol in `connectorProtocol.ts`). API keys stay in
+  `storage.local` (`secrets.ts`) and never reach the YouTube page.
 - The popup's Summary tab (`entrypoints/popup/Summary.svelte`) runs it and
   keeps finished conversations in `storage.session` (`components/ai/cache.ts`).
 

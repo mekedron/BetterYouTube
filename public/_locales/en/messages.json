@@ -214,5 +214,122 @@
   },
   "aiLanguageNote": {
     "message": "Chrome's built-in AI writes only in these languages, so for your browser language the summary is in English."
+  },
+  "providerAgent": {
+    "message": "Coding agent on this computer"
+  },
+  "providerOpenai": {
+    "message": "OpenAI"
+  },
+  "providerAnthropic": {
+    "message": "Anthropic (Claude)"
+  },
+  "providerGemini": {
+    "message": "Google Gemini"
+  },
+  "providerOpenrouter": {
+    "message": "OpenRouter"
+  },
+  "providerCustom": {
+    "message": "OpenAI-compatible server"
+  },
+  "apiKey": {
+    "message": "API key"
+  },
+  "apiKeyHint": {
+    "message": "Stored only in this browser and sent only to {name}."
+  },
+  "getKey": {
+    "message": "Get a key"
+  },
+  "model": {
+    "message": "Model"
+  },
+  "modelsLoading": {
+    "message": "Loading models…"
+  },
+  "modelsFailed": {
+    "message": "Could not load the models: {error}"
+  },
+  "modelPlaceholder": {
+    "message": "Model id"
+  },
+  "effort": {
+    "message": "Effort"
+  },
+  "effortDefault": {
+    "message": "Model default"
+  },
+  "effortLow": {
+    "message": "Low"
+  },
+  "effortMedium": {
+    "message": "Medium"
+  },
+  "effortHigh": {
+    "message": "High"
+  },
+  "effortHint": {
+    "message": "More effort means more thinking: slower and more expensive."
+  },
+  "baseUrl": {
+    "message": "Server address"
+  },
+  "baseUrlHint": {
+    "message": "For example Ollama: http://127.0.0.1:11434/v1"
+  },
+  "agentIntro": {
+    "message": "Use Claude Code, Codex or Gemini CLI that you already have. They run on your computer with your own subscription, with all their tools turned off."
+  },
+  "agentAllow": {
+    "message": "Allow connection"
+  },
+  "agentInstall": {
+    "message": "Install the connector once. Paste this into Terminal (macOS or Linux):"
+  },
+  "agentCopy": {
+    "message": "Copy"
+  },
+  "agentCopied": {
+    "message": "Copied"
+  },
+  "agentCheck": {
+    "message": "Check again"
+  },
+  "agentOutdated": {
+    "message": "The connector is out of date. Run the same command again to update it."
+  },
+  "agentNone": {
+    "message": "The connector found no agents. Install Claude Code, Codex or Gemini CLI, then check again."
+  },
+  "agentFailed": {
+    "message": "The connector did not answer: {error}"
+  },
+  "agentPick": {
+    "message": "Agent"
+  },
+  "builtinReady": {
+    "message": "Ready. Runs on your computer."
+  },
+  "builtinNeedsDownload": {
+    "message": "Chrome downloads the model on first use, a few gigabytes."
+  },
+  "builtinUnsupported": {
+    "message": "Not available in this browser."
+  },
+  "aiNeedsSetup": {
+    "message": "Summaries need one more step: connect “{name}” on the General tab."
+  },
+  "aiOpenSettings": {
+    "message": "Open settings"
+  },
+  "aiIntroTextOther": {
+    "message": "Connect an AI to get short summaries of videos: a coding agent you already have, such as Claude Code or Codex, or an API key from OpenAI, Anthropic, Google or OpenRouter."
+  },
+  "aiSetUp": {
+    "message": "Set up"
+  },
+  "aiAlsoAgents": {
+    "message": "Also found on your computer: {list}. You can switch in settings."
   }
 }

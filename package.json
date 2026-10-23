@@ -2,7 +2,7 @@
   "name": "betteryoutube",
   "description": "Dims low-view videos and tiny channels in YouTube recommendations, and skips Shorts nobody liked.",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "scripts": {

@@ -17,8 +17,8 @@ BetterYouTube collects no personal data and sends nothing to its developer.
 
 ## What it sends, and where
 
-The extension talks only to youtube.com, from inside the YouTube page you
-already have open:
+Apart from the AI you choose for summaries (see below), the extension talks
+only to youtube.com, from inside the YouTube page you already have open:
 
 - a request for a channel's public page header, to read its subscriber count;
 - when you are signed in, a request for YouTube's sidebar, to learn which
@@ -31,15 +31,29 @@ your browser. The extension has no server, no analytics and no ads.
 
 ## AI summaries
 
-Summaries are written by Chrome's built-in AI model (Gemini Nano), which runs
-on your device. The transcript, the video's title and your questions go to that
-model inside the browser and nowhere else. Chrome downloads the model once,
-after you turn summaries on. You can turn summaries off in the popup's General
-tab.
+You choose who writes a summary. Whichever you choose gets the video's
+transcript, title, channel name and length, your instruction, and your
+follow-up questions. Nothing else is sent, and nothing goes to the developer.
+
+- **Chrome's built-in AI** (the default) runs on your device. Chrome downloads
+  its model once, after you turn summaries on.
+- **A coding agent on your computer** (Claude Code, Codex or Gemini CLI) is
+  reached through the BetterYouTube connector, a small program you install
+  yourself. The agent then talks to its own service under your account, as it
+  does when you use it in a terminal. The connector starts the agent with its
+  tools turned off, in an empty temporary folder.
+- **A cloud API with your key** (OpenAI, Anthropic, Google Gemini, OpenRouter,
+  or any OpenAI-compatible server you name) receives the request directly from
+  your browser. Your key is stored only in this browser's local extension
+  storage and is sent only to that provider.
+
+You can turn summaries off in the popup's General tab.
 
 ## Permissions
 
-- `storage`: to save your settings.
+- `storage`: to save your settings and API keys.
+- `nativeMessaging` (optional, asked for only when you connect a coding agent):
+  to talk to the BetterYouTube connector.
 - Access to `https://www.youtube.com/*` through its content scripts. It does
   not run on any other site.
 

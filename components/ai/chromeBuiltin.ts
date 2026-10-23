@@ -62,6 +62,7 @@ class ChromeSession implements AiSession {
 export const chromeBuiltin: AiProvider = {
   id: 'chrome-builtin',
   languages: LANGUAGES,
+  needsKey: false,
 
   async status(language): Promise<ProviderStatus> {
     const model = api();

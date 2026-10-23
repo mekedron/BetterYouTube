@@ -1,5 +1,5 @@
 import type { VideoContext } from '../protocol';
-import type { AiProvider, AiSession, ChatTurn } from './types';
+import type { AiProvider, AiSession, ChatTurn, ProviderConfig } from './types';
 
 // Builds the prompts and runs a summary or a follow-up question through any
 // provider. The prompts stay short on purpose: one instruction, the video's
@@ -19,6 +19,7 @@ export type Stage =
 
 export interface RunOptions {
   provider: AiProvider;
+  config: ProviderConfig;
   language: string;
   signal: AbortSignal;
   onStage: (stage: Stage) => void;
@@ -78,6 +79,7 @@ async function openSession(options: RunOptions, history: ChatTurn[]): Promise<Ai
     system: systemPrompt(options.language),
     history,
     language: options.language,
+    config: options.config,
     signal: options.signal,
     onDownloadProgress: (progress) => options.onStage({ kind: 'downloading', progress }),
   });
