@@ -2,10 +2,26 @@ import type { VideoContext } from '../protocol';
 import type { AiProvider, AiSession, ChatTurn, ProviderConfig } from './types';
 
 // Builds the prompts and runs a summary or a follow-up question through any
-// provider. The prompts stay short on purpose: one instruction, the video's
-// title, channel and length, and the transcript.
+// provider. The prompts stay short on purpose: the viewer's instruction, a
+// fixed layout for the answer, the video's title, channel and length, and the
+// transcript.
 
 export const DEFAULT_INSTRUCTION = "I don't have time to watch this video. What is it about?";
+
+// The layout of a summary. Small on-device models drift into long prose
+// without it. Time ranges are left out: Chrome's model gets them wrong.
+const SUMMARY_LAYOUT = `Use exactly this layout, and keep every line under 20 words. Write the headings in the language of the answer.
+
+**In short:** what the video really is, and whether it has substance or is mostly filler.
+
+**What's in it**
+- One main point or part per line, with concrete details. 3 to 5 lines.
+
+**Worth watching?** Who it is for, and which part to watch, if any.`;
+
+// Follow-up answers are plain text. Without this note, small models repeat
+// the summary layout for every question.
+const FOLLOW_UP_NOTE = '(Answer this question directly in a few sentences, without the summary layout.)';
 
 /** Input tokens kept free for the reply and the provider's own overhead. */
 const REPLY_RESERVE = 700;
@@ -34,7 +50,7 @@ function languageName(code: string): string {
 
 export function systemPrompt(language: string): string {
   return (
-    'You summarize YouTube videos from their transcripts. Be concrete. ' +
+    'You summarize YouTube videos from their transcripts. Be concrete and very brief. ' +
     'Start with the answer itself, with no introduction or closing remarks. ' +
     `Use only what the transcript says. Always answer in ${languageName(language)}.`
   );
@@ -107,10 +123,10 @@ export class Conversation {
     const session = await openSession(this.options, []);
     this.session = session;
 
-    let prompt = `${instruction}\n\n${videoBlock(video, 'Transcript', video.transcript)}`;
+    let prompt = `${instruction}\n\n${SUMMARY_LAYOUT}\n\n${videoBlock(video, 'Transcript', video.transcript)}`;
     const whole = await session.measure(prompt);
     if (whole.tokens > whole.room - REPLY_RESERVE) {
-      prompt = `${instruction}\n\n${videoBlock(video, 'Notes on the transcript, part by part', await this.notes(video, session, whole))}`;
+      prompt = `${instruction}\n\n${SUMMARY_LAYOUT}\n\n${videoBlock(video, 'Notes on the transcript, part by part', await this.notes(video, session, whole))}`;
     }
 
     onStage({ kind: 'writing' });
@@ -161,7 +177,7 @@ export class Conversation {
     }
     this.options.onStage({ kind: 'writing' });
     let answer = '';
-    for await (const chunk of this.session.ask(question, this.options.signal)) {
+    for await (const chunk of this.session.ask(`${question}\n\n${FOLLOW_UP_NOTE}`, this.options.signal)) {
       answer += chunk;
       yield chunk;
     }
