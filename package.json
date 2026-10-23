@@ -13,7 +13,8 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox --mv3",
     "compile": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "demo": "wxt build && node scripts/build-demo.mjs"
   },
   "devDependencies": {
     "@wxt-dev/module-svelte": "^2.0.5",

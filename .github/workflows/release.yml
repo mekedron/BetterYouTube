@@ -1,0 +1,253 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-version:
+    name: Sync package.json with tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update package.json on main if needed
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          current=$(node -p "require('./package.json').version")
+          if [ "$current" = "$version" ]; then
+            echo "package.json on main already at $version"
+            exit 0
+          fi
+          echo "Bumping package.json on main: $current -> $version"
+          node -e '
+            const fs = require("fs");
+            const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            p.version = process.argv[1];
+            fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");
+          ' "$version"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "Sync package.json version to $tag"
+          git push origin main
+
+  build:
+    name: Build (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chrome
+            script: zip
+          - browser: firefox
+            script: zip:firefox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync package.json to tag version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          current=$(node -p "require('./package.json').version")
+          if [ "$current" != "$version" ]; then
+            echo "Overriding package.json version for build: $current -> $version"
+            node -e '
+              const fs = require("fs");
+              const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+              p.version = process.argv[1];
+              fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");
+            ' "$version"
+          else
+            echo "package.json already at $version"
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and zip extension
+        run: pnpm ${{ matrix.script }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.browser }}
+          path: .output/*.zip
+          if-no-files-found: error
+          include-hidden-files: true
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve previous tag
+        id: prev
+        run: |
+          current="${GITHUB_REF_NAME}"
+          previous=$(git tag --sort=-v:refname | grep -vFx "$current" | head -n 1 || true)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          current="${{ steps.prev.outputs.current }}"
+          previous="${{ steps.prev.outputs.previous }}"
+          repo_url="${{ github.server_url }}/${{ github.repository }}"
+          {
+            echo "## Changelog"
+            echo
+            if [ -n "$previous" ]; then
+              echo "Changes since \`$previous\`:"
+              echo
+              git log --no-merges --pretty=format:'- %s (%h)' "$previous..$current"
+              echo
+              echo
+              echo "**Full Changelog**: $repo_url/compare/$previous...$current"
+            else
+              echo "Initial release. All commits included:"
+              echo
+              git log --no-merges --pretty=format:'- %s (%h)' "$current"
+            fi
+            echo
+          } > CHANGELOG.md
+          cat CHANGELOG.md
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: CHANGELOG.md
+          files: artifacts/*.zip
+          fail_on_unmatched_files: true
+
+  publish-chrome:
+    name: Publish to Chrome Web Store
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Chrome artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chrome
+          path: artifacts
+
+      - name: Locate zip
+        id: zip
+        run: |
+          path=$(ls artifacts/*-chrome.zip | head -n 1)
+          if [ -z "$path" ]; then
+            echo "No chrome zip found in artifacts/" >&2
+            exit 1
+          fi
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+
+      - name: Submit to Chrome Web Store
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: pnpm wxt submit --chrome-zip "${{ steps.zip.outputs.path }}"
+
+  publish-firefox:
+    name: Publish to Firefox Add-ons
+    needs: build
+    runs-on: ubuntu-latest
+    # Runs once the add-on is listed on AMO and its API key is set up;
+    # until then the Firefox zip ships only with the GitHub Release.
+    env:
+      FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+      FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+      FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+    steps:
+      - name: Check AMO credentials
+        id: amo
+        run: |
+          if [ -n "$FIREFOX_JWT_ISSUER" ] && [ -n "$FIREFOX_JWT_SECRET" ] && [ -n "$FIREFOX_EXTENSION_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "AMO secrets are not set; skipping the Firefox submission."
+          fi
+
+      - name: Checkout
+        if: steps.amo.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        if: steps.amo.outputs.ready == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: steps.amo.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.amo.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Firefox artifact
+        if: steps.amo.outputs.ready == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: firefox
+          path: artifacts
+
+      - name: Submit to Firefox Add-ons
+        if: steps.amo.outputs.ready == 'true'
+        run: |
+          firefox=$(ls artifacts/*-firefox.zip | head -n 1)
+          sources=$(ls artifacts/*-sources.zip | head -n 1)
+          pnpm wxt submit --firefox-zip "$firefox" --firefox-sources-zip "$sources"

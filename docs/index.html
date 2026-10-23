@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BetterYouTube: it's not your attention span</title>
+<meta name="description" content="A free browser extension that dims padded videos, tiny content farms, AI slop and Shorts nobody liked in your YouTube recommendations. Your time is worth respecting." />
+<meta property="og:title" content="BetterYouTube: it's not your attention span. It's the padding." />
+<meta property="og:description" content="A free extension that dims the videos built to waste your time, so the ones worth it stand out." />
+<meta property="og:image" content="https://mekedron.github.io/BetterYouTube/images/og.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="images/icon-32.png" />
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f4ef;
+    --bg-2: #ece8df;
+    --card: #ffffff;
+    --ink: #16131b;
+    --body: #3d3844;
+    --muted: #77707f;
+    --line: rgba(22, 19, 27, 0.1);
+    --accent: #e98500;
+    --accent-ink: #a65d00;
+    --accent-soft: rgba(233, 133, 0, 0.13);
+    --shadow: 0 20px 50px rgba(22, 19, 27, 0.1);
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #100e13;
+      --bg-2: #18151c;
+      --card: #1d1a22;
+      --ink: #f4f1f7;
+      --body: #cfcad6;
+      --muted: #918b9b;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: #ffa62b;
+      --accent-ink: #ffc46b;
+      --accent-soft: rgba(255, 166, 43, 0.14);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font: 400 17px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+  .wrap { width: min(1120px, 100% - 32px); margin: 0 auto; }
+
+  /* ---- Top bar ---- */
+  .top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top .wrap { display: flex; align-items: center; gap: 14px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 700; text-decoration: none; letter-spacing: -0.01em; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; }
+  .top nav { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--ink); }
+  .lang select { appearance: none; border: 1px solid var(--line); border-radius: 9px; background: var(--card); color: var(--ink); font: 600 13px/1 var(--sans); padding: 7px 26px 7px 10px; cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: right 12px top 50%, right 8px top 50%; background-size: 4px 4px; background-repeat: no-repeat; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (max-width: 640px) { .top nav a.hide-sm { display: none; } }
+
+  /* ---- Hero ---- */
+  .hero { padding: 96px 0 72px; overflow: hidden; }
+  .kicker { display: inline-flex; align-items: center; gap: 8px; color: var(--accent-ink); font: 600 14px/1 var(--sans); letter-spacing: 0.04em; text-transform: uppercase; }
+  .kicker::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  h1 {
+    margin: 22px 0 0;
+    color: var(--ink);
+    font: 800 clamp(42px, 7.4vw, 92px)/0.98 var(--sans);
+    letter-spacing: -0.045em;
+    max-width: 14ch;
+  }
+  h1 .strike { color: var(--muted); font-weight: 700; text-decoration: line-through 0.09em var(--accent); text-decoration-skip-ink: none; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { max-width: 640px; margin: 28px 0 0; font-size: clamp(18px, 2vw, 21px); line-height: 1.55; color: var(--body); }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 20px; border-radius: 12px;
+    font: 650 16px/1 var(--sans); text-decoration: none;
+    border: 1px solid var(--line); color: var(--ink); background: var(--card);
+  }
+  .btn.primary { background: var(--ink); color: var(--bg); border-color: transparent; }
+  .btn small { font-weight: 500; opacity: 0.7; }
+  .btn svg { width: 20px; height: 20px; }
+  .note { margin-top: 14px; color: var(--muted); font-size: 14px; }
+
+  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } .stack { display: none; } }
+  .stack { display: grid; justify-items: center; }
+  .mini {
+    width: min(290px, 100%); padding: 11px; border-radius: 18px; background: var(--card);
+    border: 1px solid var(--line); box-shadow: var(--shadow);
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+    transition: opacity .3s ease, filter .3s ease;
+  }
+  .mini + .mini { margin-top: -34px; }
+  .mini:nth-child(2) { position: relative; z-index: 2; }
+  .mini.dim { opacity: .28; filter: grayscale(1); }
+  .mini-thumb { aspect-ratio: 16/9; border-radius: 11px; display: grid; place-items: center; padding: 14px; text-align: center; color: #fff; font: 850 22px/1.05 var(--sans); letter-spacing: -.02em; text-shadow: 0 2px 10px rgba(0,0,0,.35); }
+  .mini-thumb.calm { font: 650 18px/1.25 var(--sans); text-shadow: none; }
+  .mini i { display: block; height: 9px; margin-top: 10px; border-radius: 5px; background: var(--line); }
+  .mini i.short { width: 55%; margin-top: 7px; }
+
+  /* ---- Manifesto ---- */
+  .manifesto { padding: 72px 0; border-top: 1px solid var(--line); }
+  .manifesto .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 56px; align-items: start; }
+  @media (max-width: 860px) { .manifesto .grid { grid-template-columns: 1fr; gap: 24px; } }
+  h2 { margin: 0; color: var(--ink); font: 780 clamp(30px, 4.2vw, 48px)/1.05 var(--sans); letter-spacing: -0.035em; }
+  .manifesto p { margin: 0 0 18px; }
+  .manifesto blockquote {
+    margin: 30px 0 0; padding: 0 0 0 22px; border-left: 3px solid var(--accent);
+    color: var(--ink); font: 400 clamp(21px, 2.4vw, 26px)/1.4 var(--serif); font-style: italic;
+  }
+
+  /* ---- Demo ---- */
+  .demo { padding: 80px 0; background: var(--bg-2); }
+  .demo-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 30px; }
+  .demo-head p { margin: 10px 0 0; max-width: 560px; color: var(--muted); }
+  .demo-grid { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .demo-grid { grid-template-columns: 1fr; } .demo-grid .popup-frame { justify-self: center; order: -1; position: static; } }
+  .feed { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 16px; }
+  @media (max-width: 720px) { .feed { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 440px) { .feed { gap: 16px 10px; } .video h3 { font-size: 13px; } .thumb { font-size: 13px; } .thumb.calm { font-size: 11.5px; } }
+  .video { transition: opacity 0.25s ease, filter 0.25s ease; }
+  .video.dimmed { opacity: 0.2; filter: grayscale(1); }
+  .video.dimmed:hover { opacity: 0.5; }
+  .video.hidden { display: none; }
+  .thumb {
+    position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden;
+    display: grid; place-items: center; padding: 10px; text-align: center;
+    color: #fff; font: 850 clamp(15px, 1.7vw, 21px)/1.05 var(--sans); letter-spacing: -0.02em; text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,.35);
+  }
+  .thumb.calm { text-transform: none; font-weight: 650; font-size: clamp(13px, 1.3vw, 16px); text-shadow: none; }
+  .thumb .len { position: absolute; right: 7px; bottom: 7px; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,.75); font: 600 11px/1.2 var(--sans); text-transform: none; letter-spacing: 0; text-shadow: none; }
+  .video h3 { margin: 10px 0 2px; color: var(--ink); font: 600 14.5px/1.35 var(--sans); }
+  .video .meta { color: var(--muted); font-size: 13px; line-height: 1.4; }
+  .popup-frame {
+    width: 360px; max-width: 100%; height: 590px; border: 0; border-radius: 18px;
+    box-shadow: var(--shadow); background: var(--bg);
+    position: sticky; top: 84px;
+  }
+
+  /* ---- Facts ---- */
+  .facts { padding: 88px 0; }
+  .facts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+  @media (max-width: 960px) { .facts-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .facts-grid { grid-template-columns: 1fr; } }
+  .fact { display: flex; flex-direction: column; padding: 24px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
+  .fact .big { color: var(--ink); font: 820 44px/1 var(--sans); letter-spacing: -0.04em; }
+  .fact .big span { color: var(--accent); }
+  .fact h3 { margin: 14px 0 8px; color: var(--ink); font: 650 17px/1.35 var(--sans); }
+  .fact p { margin: 0 0 16px; font-size: 15px; line-height: 1.55; }
+  .fact .src { margin-top: auto; color: var(--muted); font-size: 13px; line-height: 1.45; }
+  .fact .src a { color: var(--muted); }
+  .fact .src a:hover { color: var(--ink); }
+  .respect { margin-top: 28px; padding: 20px 22px; border-radius: 16px; background: var(--accent-soft); color: var(--ink); font-size: 16px; }
+
+  /* ---- Features ---- */
+  .features { padding: 88px 0; border-top: 1px solid var(--line); }
+  .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 36px; }
+  @media (max-width: 760px) { .feat-grid { grid-template-columns: 1fr; } }
+  .feat { padding: 26px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
+  .feat .icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--accent-soft); color: var(--accent-ink); }
+  .feat .icon svg { width: 22px; height: 22px; }
+  .feat h3 { margin: 16px 0 6px; color: var(--ink); font: 680 19px/1.3 var(--sans); }
+  .feat p { margin: 0; font-size: 15.5px; }
+  .honest { margin-top: 24px; color: var(--muted); font-size: 15px; max-width: 760px; }
+
+  /* ---- Next ---- */
+  .next { padding: 80px 0; background: var(--ink); color: var(--bg); }
+  .next .wrap { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 860px) { .next .wrap { grid-template-columns: 1fr; } }
+  .next h2 { color: var(--bg); }
+  .next p { color: color-mix(in srgb, var(--bg) 78%, transparent); margin: 16px 0 0; }
+  .badge { display: inline-block; margin-bottom: 16px; padding: 5px 10px; border-radius: 999px; background: var(--accent); color: #1a1205; font: 700 12px/1 var(--sans); letter-spacing: 0.05em; text-transform: uppercase; }
+  .tldr { padding: 22px; border-radius: 18px; background: color-mix(in srgb, var(--bg) 8%, transparent); border: 1px solid color-mix(in srgb, var(--bg) 14%, transparent); }
+  .tldr .label { color: var(--accent); font: 700 13px/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; }
+  .tldr ul { margin: 14px 0 0; padding-left: 18px; color: color-mix(in srgb, var(--bg) 88%, transparent); font-size: 15.5px; }
+  .tldr li + li { margin-top: 6px; }
+  .tldr .verdict { margin-top: 14px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--bg) 14%, transparent); font-size: 14px; color: color-mix(in srgb, var(--bg) 70%, transparent); }
+
+  /* ---- Privacy + install ---- */
+  .privacy { padding: 88px 0; }
+  .privacy .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  @media (max-width: 760px) { .privacy .grid { grid-template-columns: 1fr; } }
+  .privacy .item { padding: 22px; border-radius: 16px; border: 1px solid var(--line); }
+  .privacy .item b { display: block; color: var(--ink); margin-bottom: 4px; }
+  .privacy .item span { font-size: 15px; }
+  .install { margin-top: 56px; padding: 40px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); text-align: center; }
+  .install .cta { justify-content: center; }
+
+  footer { padding: 36px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="images/icon-128.png" alt="" />BetterYouTube</a>
+    <nav>
+      <a class="hide-sm" href="#demo" data-i18n="navDemo">Try it</a>
+      <a class="hide-sm" href="#why" data-i18n="navWhy">Why</a>
+      <a href="https://github.com/mekedron/BetterYouTube">GitHub</a>
+      <label class="lang"><span class="sr">Language</span><select id="lang" aria-label="Language"></select></label>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+      <span class="kicker" data-i18n="kicker">A browser extension for YouTube</span>
+      <h1 data-i18n="h1">It's not your <span class="strike">attention span</span>. It's the <em>padding</em>.</h1>
+      <p class="lede" data-i18n="lede">BetterYouTube dims the videos built to waste your time: filler with a loud thumbnail, tiny content farms, AI slop and Shorts nobody liked. The videos worth your evening stand out again.</p>
+      <div class="cta">
+        <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 8h9M8.5 14 4 6.3M15.5 14 11 21.8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <span data-i18n="ctaChrome">Add to Chrome</span>
+        </a>
+        <a class="btn" href="#demo"><span data-i18n="ctaDemo">Try the settings</span></a>
+      </div>
+      <p class="note" data-i18n="ctaNote">Free and open source. No account, no tracking. Chrome, Edge, Brave and other Chromium browsers; Firefox build included.</p>
+      </div>
+      <div class="stack" aria-hidden="true">
+        <div class="mini dim" style="--r:-7deg;--x:-34px;--y:8px"><div class="mini-thumb" style="background:linear-gradient(135deg,#ff0844,#ffb199)" data-i18n="heroCard1">YOU WON'T BELIEVE 😱</div><i></i><i class="short"></i></div>
+        <div class="mini" style="--r:2deg;--x:26px;--y:-18px"><div class="mini-thumb calm" style="background:linear-gradient(135deg,#2c3e50,#4ca1af)" data-i18n="heroCard2">A 30-minute talk worth every minute</div><i></i><i class="short"></i></div>
+        <div class="mini dim" style="--r:-3deg;--x:-6px;--y:-40px"><div class="mini-thumb" style="background:linear-gradient(135deg,#7f00ff,#e100ff)" data-i18n="heroCard3">AI REPLACES YOU</div><i></i><i class="short"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="manifesto" id="why">
+    <div class="wrap grid">
+      <h2 data-i18n="manifestoTitle">Every click is a trade. Your time for their watch time.</h2>
+      <div>
+        <p data-i18n="manifestoP1">More and more people decide they can't focus because a twenty-minute video felt endless. Often the problem isn't the viewer. It's a video stretched to hit a length, with three minutes of substance and seventeen of intro, recap and "before we start".</p>
+        <p data-i18n="manifestoP2">Long isn't the enemy. A thirty-minute talk from a game developer on how they built their animation system can be worth every second. So can a good lecture. What wastes time is padding, sold with a shocked face on the thumbnail and a title that promises what the video never delivers. That's a dark pattern, and it works on everyone.</p>
+        <p data-i18n="manifestoP3">Choosing a video means giving a creator part of your life. BetterYouTube helps you give it to people who respect it.</p>
+        <blockquote data-i18n="quote">Time is the most valuable thing I have. Respect should go both ways.</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <div class="demo-head">
+        <div>
+          <h2 data-i18n="demoTitle">Try it on a sample feed</h2>
+          <p data-i18n="demoText">This is the real extension popup. Move the sliders or switch to “Hidden” and watch the feed change. The videos and channels are made up.</p>
+        </div>
+      </div>
+      <div class="demo-grid">
+        <div class="feed" id="feed"></div>
+        <iframe class="popup-frame" id="popup" title="BetterYouTube popup"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts">
+    <div class="wrap">
+      <h2 data-i18n="factsTitle">What the research actually says</h2>
+      <div class="facts-grid">
+        <article class="fact">
+          <div class="big">8<span> s</span></div>
+          <h3 data-i18n="f1Title">The “goldfish attention span” has no study behind it</h3>
+          <p data-i18n="f1Text">In 2015 headlines claimed our attention span had dropped to 8 seconds, below a goldfish's 9. The BBC traced the number and found no research behind it. Researchers it spoke to called an “average attention span” meaningless, because attention depends on the task.</p>
+          <div class="src"><a href="https://www.bbc.com/news/health-38896790">BBC News: Busting the attention span myth</a> · <a href="https://time.com/3858309/attention-spans-goldfish/">Time, 2015</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">47<span> s</span></div>
+          <h3 data-i18n="f2Title">The scary number measures switching screens, not watching</h3>
+          <p data-i18n="f2Text">Gloria Mark found that people switch between screens about every 47 seconds, against 2.5 minutes in 2004. That is about tabs and notifications at work. It says nothing about whether you can follow a good video.</p>
+          <div class="src"><a href="https://www.universityofcalifornia.edu/news/how-sharpen-your-attention-and-meet-your-goals-2024">University of California, 2024</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">2012</div>
+          <h3 data-i18n="f3Title">YouTube started paying for minutes</h3>
+          <p data-i18n="f3Text">In 2012 YouTube made watch time the main signal for recommendations. Since 2020 a video needs only 8 minutes to carry ads in the middle. The system rewards minutes watched, not what you learned in them.</p>
+          <div class="src"><a href="https://youtubecreator-uk.googleblog.com/2012/09/youtube-now-why-we-focus-on-watch-time.html">YouTube Creator Blog, 2012</a> · <a href="https://www.tubefilter.com/2020/07/07/youtube-lowering-minimum-video-length-mid-roll-ads/">Tubefilter, 2020</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">85<span>%</span></div>
+          <h3 data-i18n="f4Title">People want denser videos, not shorter ones</h3>
+          <p data-i18n="f4Text">When viewers change the playback speed, they speed up more than 85% of the time. Viewers save over 900 years of watching every day that way. That's not a short attention span. That's people skipping the water.</p>
+          <div class="src"><a href="https://blog.youtube/inside-youtube/youtube-watch-video-playback-speeds-trends">YouTube Official Blog, 2022</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">21<span>%</span></div>
+          <h3 data-i18n="f5Title">AI slop is already in the feed</h3>
+          <p data-i18n="f5Text">Kapwing opened a fresh account and checked the first 500 Shorts it was shown. 104 of them, about one in five, were AI-generated. In 2025 YouTube renamed its rule on “repetitive or mass-produced” videos to “inauthentic content”.</p>
+          <div class="src"><a href="https://www.kapwing.com/blog/ai-slop-report-the-global-rise-of-low-quality-ai-videos/">Kapwing, 2025</a> · <a href="https://support.google.com/youtube/answer/1311392">YouTube Partner Program policies</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">52<span>%</span></div>
+          <h3 data-i18n="f6Title">Half of popular ADHD TikToks were misleading</h3>
+          <p data-i18n="f6Text">A 2022 study looked at the 100 most popular TikTok videos about ADHD. 52 were misleading, and only 21 were useful. A feed full of padded videos and a feed full of self-diagnosis feed each other.</p>
+          <div class="src"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9659797/">Canadian Journal of Psychiatry, 2022</a></div>
+        </article>
+      </div>
+      <p class="respect" data-i18n="respect">ADHD is real, and it deserves a real assessment by a specialist. This page is not about that. It's about the many people who were told their brain is broken when the video was simply bad.</p>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="wrap">
+      <h2 data-i18n="featTitle">What it does</h2>
+      <div class="feat-grid">
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3 data-i18n="feat1Title">Dims videos almost nobody watched</h3>
+          <p data-i18n="feat1Text">Home, the “Up next” column and, if you like, search results. You choose the line: 50K views by default, anywhere from 1K to 5M.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3 data-i18n="feat2Title">Spots tiny channels and content farms</h3>
+          <p data-i18n="feat2Text">Cards don't show subscriber counts, so the extension asks YouTube once per channel and remembers it for a week. Channels you subscribe to are never touched.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></div>
+          <h3 data-i18n="feat3Title">Skips Shorts nobody liked</h3>
+          <p data-i18n="feat3Text">Removes Shorts shelves from Home. In the Shorts player, a Short with fewer likes than you set is covered, muted and paused, so you scroll past it without hearing a second.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></div>
+          <h3 data-i18n="feat4Title">Your rules, in your language</h3>
+          <p data-i18n="feat4Text">Dim or hide, pick the pages, set every threshold, pause with one switch. Light or dark and the language of your browser, with more translations on the way.</p>
+        </article>
+      </div>
+      <p class="honest" data-i18n="honest">An honest caveat: views are a rough signal. A great new video starts at zero views too. That's why the default is to dim, not to hide, and hovering a dimmed video brings it back.</p>
+    </div>
+  </section>
+
+  <section class="next">
+    <div class="wrap">
+      <div>
+        <span class="badge" data-i18n="nextBadge">Coming next</span>
+        <h2 data-i18n="nextTitle">TL;DR before you press play</h2>
+        <p data-i18n="nextText">A short AI summary right on the video page: what's inside, how much of it is filler, and whether the answer fits in one paragraph. Spend twenty minutes only when it's worth twenty minutes.</p>
+      </div>
+      <div class="tldr" aria-hidden="true">
+        <div class="label">TL;DR</div>
+        <ul>
+          <li data-i18n="tldr1">The trick is to replace the chain when it stretches past 0.5%.</li>
+          <li data-i18n="tldr2">A $10 chain checker tells you when.</li>
+          <li data-i18n="tldr3">Everything else in the video is a sponsor and a story about Italy.</li>
+        </ul>
+        <div class="verdict" data-i18n="tldrVerdict">Useful part: about 2 minutes of 18.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy">
+    <div class="wrap">
+      <h2 data-i18n="privacyTitle">Nothing leaves your browser</h2>
+      <div class="grid">
+        <div class="item"><b data-i18n="p1Title">No servers</b><span data-i18n="p1Text">The extension has no backend. Subscriber counts come straight from YouTube and stay on your computer.</span></div>
+        <div class="item"><b data-i18n="p2Title">No tracking</b><span data-i18n="p2Text">No analytics, no accounts, no ads. Your settings sync through your own browser profile.</span></div>
+        <div class="item"><b data-i18n="p3Title">One site only</b><span data-i18n="p3Text">It runs on youtube.com and nowhere else, with a single “storage” permission for your settings.</span></div>
+      </div>
+      <div class="install">
+        <h2 data-i18n="installTitle">Give your time to people who respect it</h2>
+        <div class="cta">
+          <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest"><span data-i18n="ctaChrome">Add to Chrome</span></a>
+          <a class="btn" href="https://github.com/mekedron/BetterYouTube"><span data-i18n="ctaSource">Source on GitHub</span></a>
+          <a class="btn" href="https://buymeacoffee.com/mekedron"><span data-i18n="ctaCoffee">Buy me a coffee</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="footer">Made by one indie developer. Not affiliated with YouTube or Google.</span>
+    <span><a href="https://github.com/mekedron/BetterYouTube/blob/main/PRIVACY.md" data-i18n="privacyLink">Privacy</a> · MIT</span>
+  </div>
+</footer>
+
+<script src="i18n.js"></script>
+<script>
+  // The Chrome Web Store link, once the listing is live. Until then the
+  // buttons point to the latest GitHub release.
+  const CHROME_STORE_URL = '';
+  if (CHROME_STORE_URL) for (const a of document.querySelectorAll('[data-store="chrome"]')) a.href = CHROME_STORE_URL;
+
+  // ---- Sample feed ----
+  // views and subs drive the filter exactly as the extension's thresholds do.
+  const VIDEOS = [
+    { t: 'How we built procedural animation for our game: full talk', ch: 'Indie Dev Talks', views: 840e3, subs: 310e3, len: '31:12', th: 'Procedural animation, explained', bg: 'linear-gradient(135deg,#2c3e50,#4ca1af)', calm: true },
+    { t: 'I tried living on $1 a day for 30 days (SHOCKING ending)', ch: 'Max Challenges', views: 31e3, subs: 12e3, len: '24:51', th: 'I almost QUIT 😱', bg: 'linear-gradient(135deg,#ff0844,#ffb199)' },
+    { t: 'The math behind GPS, in 15 minutes', ch: 'Plain Physics', views: 2.1e6, subs: 1.9e6, len: '15:04', th: 'How your phone knows where you are', bg: 'linear-gradient(135deg,#1d4350,#a43931)', calm: true },
+    { t: '10 AI tools that will REPLACE your job in 2026', ch: 'FutureTech Daily AI', views: 4.2e3, subs: 900, len: '12:00', th: 'Your job is GONE', bg: 'linear-gradient(135deg,#7f00ff,#e100ff)' },
+    { t: 'What actually happens in your brain when you learn', ch: 'Open Lecture Hall', views: 650e3, subs: 1.4e6, len: '48:20', th: 'Lecture 4: Memory', bg: 'linear-gradient(135deg,#355c7d,#6c5b7b)', calm: true },
+    { t: 'Why everyone is WRONG about coffee (watch till the end)', ch: 'Truth Uncovered', views: 44e3, subs: 22e3, len: '19:47', th: 'They LIED to you ☕', bg: 'linear-gradient(135deg,#f7971e,#ffd200)' },
+    { t: 'Building a wooden boat, start to finish', ch: 'Slow Workshop', views: 3.4e6, subs: 2.2e6, len: '42:10', th: 'Two years in one video', bg: 'linear-gradient(135deg,#134e5e,#71b280)', calm: true },
+    { t: 'AI reads Reddit stories: 3 hour compilation', ch: 'Story Time Zone', views: 9e3, subs: 5e3, len: '3:02:44', th: 'AITA?? 🤯', bg: 'linear-gradient(135deg,#ee0979,#ff6a00)' },
+    { t: 'Fixing a bike chain in 4 minutes, no fluff', ch: 'Two Wheels', views: 120e3, subs: 64e3, len: '4:08', th: 'Chain fix, no fluff', bg: 'linear-gradient(135deg,#0f2027,#2c5364)', calm: true },
+  ];
+  const DEFAULT_SETTINGS = {
+    enabled: true,
+    feed: {
+      lowViews: { enabled: true, maxViews: 50000 },
+      smallChannels: { enabled: true, minSubscribers: 50000 },
+      areas: { home: true },
+      action: 'dim',
+    },
+  };
+  let settings = DEFAULT_SETTINGS;
+  let lang = 'en';
+
+  const compact = () => new Intl.NumberFormat(lang, { notation: 'compact', maximumFractionDigits: 1 });
+  function renderFeed() {
+    const fmt = compact();
+    const viewsWord = (LANGS[lang].strings || {}).views || 'views';
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
+    let filtered = 0;
+    for (const [i, v] of VIDEOS.entries()) {
+      const f = settings.feed;
+      const on = settings.enabled && f.areas.home !== false;
+      const low = f.lowViews.enabled && v.views <= f.lowViews.maxViews;
+      const small = f.smallChannels.enabled && v.subs < f.smallChannels.minSubscribers;
+      const hit = on && (low || small);
+      if (hit) filtered++;
+      const el = document.createElement('article');
+      el.className = 'video' + (hit ? (f.action === 'hide' ? ' hidden' : ' dimmed') : '');
+      el.innerHTML = `<div class="thumb${v.calm ? ' calm' : ''}" style="background:${v.bg}"><span></span><span class="len"></span></div><h3></h3><div class="meta"></div>`;
+      el.querySelector('.thumb span').textContent = ((LANGS[lang].strings || {}).videoThumbs || [])[i] || v.th;
+      el.querySelector('.len').textContent = v.len;
+      el.querySelector('h3').textContent = ((LANGS[lang].strings || {}).videoTitles || [])[i] || v.t;
+      el.querySelector('.meta').textContent = `${v.ch} · ${fmt.format(v.views)} ${viewsWord}`;
+      feed.appendChild(el);
+    }
+    demoStats = { filteredCards: filtered, skippedShorts: 0 };
+    sendStats();
+  }
+
+  // The popup shows these as "on this tab"; it reloads with every language
+  // switch, so it gets them again on load.
+  let demoStats = { filteredCards: 0, skippedShorts: 0 };
+  function sendStats() {
+    document.getElementById('popup').contentWindow?.postMessage({ type: 'byt-demo-stats', stats: demoStats }, '*');
+  }
+
+  // A fresh frame for every language: a reloaded page restores a frame's
+  // previous address, which would keep the popup in the old language.
+  function loadPopup(code) {
+    const old = document.getElementById('popup');
+    const frame = old.cloneNode(false);
+    frame.src = `demo/index.html?lang=${code}`;
+    frame.addEventListener('load', sendStats);
+    old.replaceWith(frame);
+  }
+
+  window.addEventListener('message', (event) => {
+    if (event.data?.type !== 'byt-demo-settings') return;
+    settings = event.data.settings;
+    renderFeed();
+  });
+
+  // ---- Language ----
+  const LANGS = window.LANDING_LANGUAGES;
+  const english = {};
+  for (const el of document.querySelectorAll('[data-i18n]')) english[el.dataset.i18n] = el.innerHTML;
+  const menu = document.getElementById('lang');
+  for (const [code, { name }] of Object.entries(LANGS)) menu.add(new Option(name, code));
+
+  function setLang(next, remember) {
+    lang = next;
+    document.documentElement.lang = next;
+    menu.value = next;
+    const dict = LANGS[next].strings || {};
+    for (const el of document.querySelectorAll('[data-i18n]')) {
+      el.innerHTML = dict[el.dataset.i18n] ?? english[el.dataset.i18n];
+    }
+    // A new popup starts from the default settings, and so does the feed.
+    settings = DEFAULT_SETTINGS;
+    loadPopup(next);
+    renderFeed();
+    if (remember) try { localStorage.setItem('lang', next); } catch {}
+  }
+  menu.addEventListener('change', () => setLang(menu.value, true));
+
+  // The first of the browser's preferred languages that has a translation.
+  function preferredLang() {
+    try {
+      const saved = localStorage.getItem('lang');
+      if (saved && LANGS[saved]) return saved;
+    } catch {}
+    for (const tag of navigator.languages || [navigator.language]) {
+      const code = tag.toLowerCase().split('-')[0];
+      if (LANGS[code]) return code;
+    }
+    return 'en';
+  }
+  setLang(preferredLang(), false);
+</script>
+</body>
+</html>

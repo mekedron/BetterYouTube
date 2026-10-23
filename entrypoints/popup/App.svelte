@@ -183,7 +183,7 @@
               <label class="chip"><input type="checkbox" bind:checked={settings.feed.areas.search} />{t('areaSearch')}</label>
             </div>
           </div>
-          <div class="row">
+          <div class="row stacked">
             <div class="title">{t('actionTitle')}</div>
             <div class="segmented" role="radiogroup" aria-label={t('actionTitle')}>
               <label><input type="radio" bind:group={settings.feed.action} value="dim" />{t('actionDim')}</label>
@@ -468,6 +468,7 @@
 
   .segmented {
     display: inline-flex;
+    align-self: flex-start;
     padding: 2px;
     border-radius: 9px;
     background: var(--chip);
