@@ -3,7 +3,7 @@
   import {
     AGENT_MODELS,
     detectAgents,
-    INSTALL_COMMAND,
+    installCommand,
     requestConnectorPermission,
   } from '../../components/ai/connector';
   import type { Detection } from '../../components/ai/connector';
@@ -37,7 +37,10 @@
 
   // ---- Coding agent ----
   let detection = $state<Detection | null>(null);
+  let checking = $state(false);
+  let stillFailing = $state(false);
   let copied = $state(false);
+  const command = installCommand();
 
   let preparedFor = '';
   $effect(() => {
@@ -80,7 +83,14 @@
   }
 
   async function refreshAgents(refresh: boolean) {
-    detection = await detectAgents(refresh);
+    checking = true;
+    const before = detection;
+    try {
+      detection = await detectAgents(refresh);
+    } finally {
+      checking = false;
+    }
+    stillFailing = refresh && !!before && !before.ok && !detection.ok && before.reason === detection.reason;
     // Keep the chosen agent among the ones the connector found.
     if (detection.ok && detection.agents.length && !detection.agents.some((a) => a.id === own.agent)) {
       settings.ai.providers.agent.agent = detection.agents[0].id;
@@ -92,7 +102,7 @@
   }
 
   async function copyCommand() {
-    await navigator.clipboard.writeText(INSTALL_COMMAND);
+    await navigator.clipboard.writeText(command);
     copied = true;
     setTimeout(() => (copied = false), 1500);
   }
@@ -112,19 +122,34 @@
     <div class="hint">…</div>
   {:else if !detection.ok && detection.reason === 'no-permission'}
     <button type="button" class="ghost" onclick={allow}>{t('agentAllow')}</button>
-  {:else if !detection.ok && (detection.reason === 'not-installed' || detection.reason === 'outdated')}
-    <div class="hint">{detection.reason === 'outdated' ? t('agentOutdated') : t('agentInstall')}</div>
+  {:else if !detection.ok && (detection.reason === 'not-installed' || detection.reason === 'not-allowed' || detection.reason === 'outdated')}
+    <div class="hint">
+      {detection.reason === 'outdated'
+        ? t('agentOutdated')
+        : detection.reason === 'not-allowed'
+          ? t('agentNotAllowed')
+          : t('agentInstall')}
+    </div>
     <div class="command">
-      <code>{INSTALL_COMMAND}</code>
+      <code>{command}</code>
       <button type="button" class="link" onclick={copyCommand}>{copied ? t('agentCopied') : t('agentCopy')}</button>
     </div>
-    <button type="button" class="ghost" onclick={() => refreshAgents(true)}>{t('agentCheck')}</button>
+    <button type="button" class="ghost" disabled={checking} onclick={() => refreshAgents(true)}>
+      {checking ? t('agentChecking') : t('agentCheck')}
+    </button>
+    {#if stillFailing && !checking}<div class="hint error">{t('agentStillFailing')}</div>{/if}
   {:else if !detection.ok}
     <div class="hint error">{t('agentFailed', undefined, { error: detection.message ?? '' })}</div>
-    <button type="button" class="ghost" onclick={() => refreshAgents(true)}>{t('agentCheck')}</button>
+    <button type="button" class="ghost" disabled={checking} onclick={() => refreshAgents(true)}>
+      {checking ? t('agentChecking') : t('agentCheck')}
+    </button>
+    {#if stillFailing && !checking}<div class="hint error">{t('agentStillFailing')}</div>{/if}
   {:else if detection.agents.length === 0}
     <div class="hint">{t('agentNone')}</div>
-    <button type="button" class="ghost" onclick={() => refreshAgents(true)}>{t('agentCheck')}</button>
+    <button type="button" class="ghost" disabled={checking} onclick={() => refreshAgents(true)}>
+      {checking ? t('agentChecking') : t('agentCheck')}
+    </button>
+    {#if stillFailing && !checking}<div class="hint error">{t('agentStillFailing')}</div>{/if}
   {:else}
     <div class="field">
       <span>{t('agentPick')}</span>
@@ -260,6 +285,10 @@
     color: var(--fg);
     font: 500 12.5px/1 var(--font);
     cursor: pointer;
+  }
+  .ghost:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
   .link {
     flex: none;

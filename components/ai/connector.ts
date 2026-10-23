@@ -12,6 +12,19 @@ import type { AiProvider, ChatTurn, ProviderConfig, ProviderStatus } from './typ
 
 export const INSTALL_COMMAND = 'curl -fsSL https://mekedron.github.io/BetterYouTube/connector/install.sh | sh';
 
+/** The Chrome Web Store copy, which the connector allows without being told. */
+const STORE_ID = 'dbbghiihkgjghkgbhflpnhajdbfpgnag';
+
+/**
+ * The install command for this copy of the extension. A copy loaded from a
+ * folder has its own id, and the connector answers only the ids it was
+ * installed for, so the command names it.
+ */
+export function installCommand(): string {
+  const id = browser.runtime.id;
+  return /^[a-p]{32}$/.test(id) && id !== STORE_ID ? `${INSTALL_COMMAND} -s -- --extension-id ${id}` : INSTALL_COMMAND;
+}
+
 /** Agents' context windows are large; this keeps requests reasonable. */
 const CONTEXT_TOKENS = 150_000;
 
@@ -52,8 +65,11 @@ async function* talk(request: ConnectorRequest, signal?: AbortSignal): AsyncIter
         continue;
       }
       if (closed !== null) {
-        // Chrome says "Specified native messaging host not found."; Firefox
-        // says "No such native application".
+        // Chrome says "Specified native messaging host not found." or, for an
+        // extension the connector does not list, "Access to the specified
+        // native messaging host is forbidden."; Firefox says "No such native
+        // application".
+        if (/forbidden/i.test(closed)) throw new ProviderError('connector-forbidden');
         throw new ProviderError(/not found|no such native/i.test(closed) ? 'connector-missing' : closed || 'connector-closed');
       }
       await new Promise<void>((resolve) => (wake = resolve));
@@ -69,7 +85,7 @@ async function* talk(request: ConnectorRequest, signal?: AbortSignal): AsyncIter
 
 export type Detection =
   | { ok: true; agents: DetectedAgent[] }
-  | { ok: false; reason: 'no-permission' | 'not-installed' | 'outdated' | 'failed'; message?: string };
+  | { ok: false; reason: 'no-permission' | 'not-installed' | 'not-allowed' | 'outdated' | 'failed'; message?: string };
 
 let cached: Promise<Detection> | null = null;
 
@@ -91,6 +107,7 @@ async function detect(): Promise<Detection> {
     }
   } catch (e) {
     if (e instanceof ProviderError && e.message === 'connector-missing') return { ok: false, reason: 'not-installed' };
+    if (e instanceof ProviderError && e.message === 'connector-forbidden') return { ok: false, reason: 'not-allowed' };
     return { ok: false, reason: 'failed', message: e instanceof Error ? e.message : String(e) };
   }
   return { ok: false, reason: 'failed' };

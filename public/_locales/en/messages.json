@@ -331,5 +331,14 @@
   },
   "aiAlsoAgents": {
     "message": "Also found on your computer: {list}. You can switch in settings."
+  },
+  "agentNotAllowed": {
+    "message": "The connector is installed, but it does not let this copy of the extension in yet. Run this command once more:"
+  },
+  "agentChecking": {
+    "message": "Checking…"
+  },
+  "agentStillFailing": {
+    "message": "Still the same. If you just ran the command, close this popup and open it again."
   }
 }
