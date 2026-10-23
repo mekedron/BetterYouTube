@@ -1,0 +1,25 @@
+{
+  "name": "betteryoutube",
+  "description": "Dims low-view videos and tiny channels in YouTube recommendations, and skips Shorts nobody liked.",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox --mv3",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox --mv3",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox --mv3",
+    "compile": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "@wxt-dev/module-svelte": "^2.0.5",
+    "svelte": "^5.55.0",
+    "svelte-check": "^4.1.0",
+    "typescript": "^5.7.0",
+    "wxt": "^0.20.0"
+  }
+}

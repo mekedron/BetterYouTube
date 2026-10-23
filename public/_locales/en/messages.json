@@ -1,0 +1,119 @@
+{
+  "extDescription": {
+    "message": "Dims low-view videos and tiny channels in YouTube recommendations, and skips Shorts nobody liked."
+  },
+  "on": {
+    "message": "On"
+  },
+  "off": {
+    "message": "Off"
+  },
+  "masterLabel": {
+    "message": "Filtering"
+  },
+  "statusNothing": {
+    "message": "Nothing filtered yet"
+  },
+  "statusNotYouTube": {
+    "message": "Open YouTube to see it at work"
+  },
+  "statusPaused": {
+    "message": "Paused. YouTube looks as usual."
+  },
+  "lowViewsTitle": {
+    "message": "Few views"
+  },
+  "lowViewsHint": {
+    "message": "Videos with {n} views or fewer"
+  },
+  "smallChannelsTitle": {
+    "message": "Small channels"
+  },
+  "smallChannelsHint": {
+    "message": "Channels with fewer than {n} subscribers"
+  },
+  "exemptSubscriptions": {
+    "message": "Never touch channels I'm subscribed to"
+  },
+  "areasTitle": {
+    "message": "Where"
+  },
+  "areaHome": {
+    "message": "Home"
+  },
+  "areaWatch": {
+    "message": "Up next"
+  },
+  "areaSearch": {
+    "message": "Search"
+  },
+  "actionTitle": {
+    "message": "Filtered videos are"
+  },
+  "actionDim": {
+    "message": "Dimmed"
+  },
+  "actionHide": {
+    "message": "Hidden"
+  },
+  "homeShortsTitle": {
+    "message": "Hide Shorts on Home"
+  },
+  "homeShortsHint": {
+    "message": "Removes Shorts shelves from the home page"
+  },
+  "shortsTitle": {
+    "message": "Skip Shorts with few likes"
+  },
+  "shortsHint": {
+    "message": "Covers and mutes Shorts with fewer than {n} likes"
+  },
+  "skipHiddenLikes": {
+    "message": "Also skip Shorts that hide their likes"
+  },
+  "badgeTitle": {
+    "message": "Count on the toolbar icon"
+  },
+  "badgeHint": {
+    "message": "How many videos are filtered in the tab"
+  },
+  "clearCache": {
+    "message": "Recheck channel sizes"
+  },
+  "clearCacheHint": {
+    "message": "Subscriber counts are kept for a week. This forgets them."
+  },
+  "clearCacheDone": {
+    "message": "Done. Counts reload as you browse."
+  },
+  "clearCacheNoTab": {
+    "message": "Open a YouTube tab first"
+  },
+  "website": {
+    "message": "Website"
+  },
+  "support": {
+    "message": "Support"
+  },
+  "pageShortFewLikes": {
+    "message": "Skipped: {n} likes"
+  },
+  "pageShortNoLikes": {
+    "message": "Skipped: no likes shown"
+  },
+  "tabFeed": {
+    "message": "Recommendations"
+  },
+  "tabShorts": {
+    "message": "Shorts"
+  },
+  "tabGeneral": {
+    "message": "General"
+  },
+  "statFiltered": {
+    "message": "videos filtered"
+  },
+  "statShorts": {
+    "message": "Shorts skipped"
+  }
+}

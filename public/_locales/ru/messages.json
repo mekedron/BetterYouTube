@@ -1,0 +1,119 @@
+{
+  "extDescription": {
+    "message": "Приглушает в рекомендациях YouTube видео с малым числом просмотров и мелкие каналы, пропускает Shorts без лайков."
+  },
+  "on": {
+    "message": "Вкл"
+  },
+  "off": {
+    "message": "Выкл"
+  },
+  "masterLabel": {
+    "message": "Фильтр"
+  },
+  "statusNothing": {
+    "message": "Пока ничего не отфильтровано"
+  },
+  "statusNotYouTube": {
+    "message": "Откройте YouTube, чтобы увидеть работу"
+  },
+  "statusPaused": {
+    "message": "На паузе. YouTube выглядит как обычно."
+  },
+  "lowViewsTitle": {
+    "message": "Мало просмотров"
+  },
+  "lowViewsHint": {
+    "message": "Видео с {n} просмотров и меньше"
+  },
+  "smallChannelsTitle": {
+    "message": "Маленькие каналы"
+  },
+  "smallChannelsHint": {
+    "message": "Каналы, где меньше {n} подписчиков"
+  },
+  "exemptSubscriptions": {
+    "message": "Не трогать каналы, на которые я подписан"
+  },
+  "areasTitle": {
+    "message": "Где"
+  },
+  "areaHome": {
+    "message": "Главная"
+  },
+  "areaWatch": {
+    "message": "Справа от видео"
+  },
+  "areaSearch": {
+    "message": "Поиск"
+  },
+  "actionTitle": {
+    "message": "Отфильтрованные видео"
+  },
+  "actionDim": {
+    "message": "Приглушать"
+  },
+  "actionHide": {
+    "message": "Скрывать"
+  },
+  "homeShortsTitle": {
+    "message": "Убрать Shorts с главной"
+  },
+  "homeShortsHint": {
+    "message": "Скрывает полки Shorts на главной странице"
+  },
+  "shortsTitle": {
+    "message": "Пропускать Shorts с малым числом лайков"
+  },
+  "shortsHint": {
+    "message": "Закрывает и выключает звук у Shorts, где меньше {n} лайков"
+  },
+  "skipHiddenLikes": {
+    "message": "Пропускать и Shorts со скрытыми лайками"
+  },
+  "badgeTitle": {
+    "message": "Счётчик на значке"
+  },
+  "badgeHint": {
+    "message": "Сколько видео отфильтровано во вкладке"
+  },
+  "clearCache": {
+    "message": "Перепроверить каналы"
+  },
+  "clearCacheHint": {
+    "message": "Число подписчиков хранится неделю. Кнопка его сбрасывает."
+  },
+  "clearCacheDone": {
+    "message": "Готово. Данные обновятся по ходу просмотра."
+  },
+  "clearCacheNoTab": {
+    "message": "Сначала откройте вкладку YouTube"
+  },
+  "website": {
+    "message": "Сайт"
+  },
+  "support": {
+    "message": "Поддержать"
+  },
+  "pageShortFewLikes": {
+    "message": "Пропущено: {n} лайков"
+  },
+  "pageShortNoLikes": {
+    "message": "Пропущено: лайки не видны"
+  },
+  "tabFeed": {
+    "message": "Рекомендации"
+  },
+  "tabShorts": {
+    "message": "Shorts"
+  },
+  "tabGeneral": {
+    "message": "Общее"
+  },
+  "statFiltered": {
+    "message": "видео отфильтровано"
+  },
+  "statShorts": {
+    "message": "Shorts пропущено"
+  }
+}
