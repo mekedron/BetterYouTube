@@ -50,11 +50,14 @@ export default defineContentScript({
     document.addEventListener(HELLO_EVENT, onHello);
     document.addEventListener(STATS_EVENT, onStats);
 
-    const onMessage = (message: RuntimeMessage) => {
-      if (message?.type === 'get-tab-stats') return Promise.resolve(stats);
-      if (message?.type === 'clear-channel-cache') {
+    // Answers through sendResponse, which every browser version supports;
+    // older Chrome ignores a promise returned from the listener.
+    const onMessage = (message: RuntimeMessage, _sender: unknown, sendResponse: (response: unknown) => void) => {
+      if (message?.type === 'get-tab-stats') {
+        sendResponse(stats);
+      } else if (message?.type === 'clear-channel-cache') {
         sendCommand({ type: 'clear-channel-cache' });
-        return Promise.resolve(true);
+        sendResponse(true);
       }
       return undefined;
     };
