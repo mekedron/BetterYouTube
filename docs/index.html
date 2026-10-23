@@ -160,7 +160,7 @@
   }
 
   /* ---- Facts ---- */
-  .facts { padding: 88px 0; }
+  .facts { padding: 72px 0 88px; border-top: 1px solid var(--line); }
   .facts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
   @media (max-width: 960px) { .facts-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 620px) { .facts-grid { grid-template-columns: 1fr; } }
@@ -251,33 +251,6 @@
     </div>
   </section>
 
-  <section class="manifesto" id="why">
-    <div class="wrap grid">
-      <h2 data-i18n="manifestoTitle">Every click is a trade. Your time for their watch time.</h2>
-      <div>
-        <p data-i18n="manifestoP1">More and more people decide they can't focus because a twenty-minute video felt endless. Often the problem isn't the viewer. It's a video stretched to hit a length, with three minutes of substance and seventeen of intro, recap and "before we start".</p>
-        <p data-i18n="manifestoP2">Long isn't the enemy. A thirty-minute talk from a game developer on how they built their animation system can be worth every second. So can a good lecture. What wastes time is padding, sold with a shocked face on the thumbnail and a title that promises what the video never delivers. That's a dark pattern, and it works on everyone.</p>
-        <p data-i18n="manifestoP3">Choosing a video means giving a creator part of your life. BetterYouTube helps you give it to people who respect it.</p>
-        <blockquote data-i18n="quote">Time is the most valuable thing I have. Respect should go both ways.</blockquote>
-      </div>
-    </div>
-  </section>
-
-  <section class="demo" id="demo">
-    <div class="wrap">
-      <div class="demo-head">
-        <div>
-          <h2 data-i18n="demoTitle">Try it on a sample feed</h2>
-          <p data-i18n="demoText">This is the real extension popup. Move the sliders or switch to “Hidden” and watch the feed change. The videos and channels are made up.</p>
-        </div>
-      </div>
-      <div class="demo-grid">
-        <div class="feed" id="feed"></div>
-        <iframe class="popup-frame" id="popup" title="BetterYouTube popup"></iframe>
-      </div>
-    </div>
-  </section>
-
   <section class="facts">
     <div class="wrap">
       <h2 data-i18n="factsTitle">What the research actually says</h2>
@@ -323,6 +296,35 @@
     </div>
   </section>
 
+  <section class="manifesto" id="why">
+    <div class="wrap grid">
+      <h2 data-i18n="manifestoTitle">Every click is a trade. Your time for their watch time.</h2>
+      <div>
+        <p data-i18n="manifestoP1">More and more people decide they can't focus because a twenty-minute video felt endless. Often the problem isn't the viewer. It's a video stretched to hit a length, with three minutes of substance and seventeen of intro, recap and "before we start".</p>
+        <p data-i18n="manifestoReview">Here's the one that drives me mad. You look for a review of a game because you want an opinion: how the combat feels, which mechanics are clever, whether it's worth your weekend. You open a twenty-minute “review” and get the author's own playthrough, cut up and narrated: here you go left, here you open a chest, here the boss has a second phase. That isn't a review. It's a retelling, made long because long pays.</p>
+        <p data-i18n="manifestoP2">Long isn't the enemy. A thirty-minute talk from a game developer on how they built their animation system can be worth every second. So can a good lecture. What wastes time is padding, sold with a shocked face on the thumbnail and a title that promises what the video never delivers. That's a dark pattern, and it works on everyone.</p>
+        <p data-i18n="manifestoP3">Choosing a video means giving a creator part of your life. BetterYouTube helps you give it to people who respect it.</p>
+        <blockquote data-i18n="quote">Time is the most valuable thing I have. Respect should go both ways.</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <div class="demo-head">
+        <div>
+          <h2 data-i18n="demoTitle">Try it on a sample feed</h2>
+          <p data-i18n="demoText">This is the real extension popup. Move the sliders or switch to “Hidden” and watch the feed change. The videos and channels are made up.</p>
+        </div>
+      </div>
+      <div class="demo-grid">
+        <div class="feed" id="feed"></div>
+        <iframe class="popup-frame" id="popup" title="BetterYouTube popup"></iframe>
+      </div>
+    </div>
+  </section>
+
+
   <section class="features">
     <div class="wrap">
       <h2 data-i18n="featTitle">What it does</h2>
@@ -362,11 +364,11 @@
       <div class="tldr" aria-hidden="true">
         <div class="label">TL;DR</div>
         <ul>
-          <li data-i18n="tldr1">The trick is to replace the chain when it stretches past 0.5%.</li>
-          <li data-i18n="tldr2">A $10 chain checker tells you when.</li>
-          <li data-i18n="tldr3">Everything else in the video is a sponsor and a story about Italy.</li>
+          <li data-i18n="tldr1">The video retells the first ten hours of the story, scene by scene.</li>
+          <li data-i18n="tldr2">Combat: “pretty fun”. No other opinion on mechanics.</li>
+          <li data-i18n="tldr3">Performance, length and price are not mentioned.</li>
         </ul>
-        <div class="verdict" data-i18n="tldrVerdict">Useful part: about 2 minutes of 18.</div>
+        <div class="verdict" data-i18n="tldrVerdict">A plot retelling, not a review. Opinion: about 40 seconds of 21 minutes.</div>
       </div>
     </div>
   </section>
@@ -413,7 +415,7 @@
     { t: 'The math behind GPS, in 15 minutes', ch: 'Plain Physics', views: 2.1e6, subs: 1.9e6, len: '15:04', th: 'How your phone knows where you are', bg: 'linear-gradient(135deg,#1d4350,#a43931)', calm: true },
     { t: '10 AI tools that will REPLACE your job in 2026', ch: 'FutureTech Daily AI', views: 4.2e3, subs: 900, len: '12:00', th: 'Your job is GONE', bg: 'linear-gradient(135deg,#7f00ff,#e100ff)' },
     { t: 'What actually happens in your brain when you learn', ch: 'Open Lecture Hall', views: 650e3, subs: 1.4e6, len: '48:20', th: 'Lecture 4: Memory', bg: 'linear-gradient(135deg,#355c7d,#6c5b7b)', calm: true },
-    { t: 'Why everyone is WRONG about coffee (watch till the end)', ch: 'Truth Uncovered', views: 44e3, subs: 22e3, len: '19:47', th: 'They LIED to you ☕', bg: 'linear-gradient(135deg,#f7971e,#ffd200)' },
+    { t: 'Starfall Odyssey review: is it worth it? (no spoilers*)', ch: 'GameTalk Mike', views: 22e3, subs: 8e3, len: '21:37', th: 'HONEST REVIEW 🎮', bg: 'linear-gradient(135deg,#f7971e,#ffd200)' },
     { t: 'Building a wooden boat, start to finish', ch: 'Slow Workshop', views: 3.4e6, subs: 2.2e6, len: '42:10', th: 'Two years in one video', bg: 'linear-gradient(135deg,#134e5e,#71b280)', calm: true },
     { t: 'AI reads Reddit stories: 3 hour compilation', ch: 'Story Time Zone', views: 9e3, subs: 5e3, len: '3:02:44', th: 'AITA?? 🤯', bg: 'linear-gradient(135deg,#ee0979,#ff6a00)' },
     { t: 'Fixing a bike chain in 4 minutes, no fluff', ch: 'Two Wheels', views: 120e3, subs: 64e3, len: '4:08', th: 'Chain fix, no fluff', bg: 'linear-gradient(135deg,#0f2027,#2c5364)', calm: true },
