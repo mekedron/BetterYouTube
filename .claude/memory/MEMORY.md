@@ -1,1 +1,0 @@
-- [Chrome Web Store listing](cws-listing.md) — item id, dashboard account, stale OAuth secret blocks CI publishing
