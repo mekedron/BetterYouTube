@@ -44,6 +44,9 @@ jobs:
       - name: Build the popup demo
         run: pnpm build && node scripts/build-demo.mjs
 
+      - name: Write the page for every language
+        run: node scripts/build-landing.mjs
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

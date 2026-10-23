@@ -42,11 +42,12 @@
   }
 
   let tab = $state<Tab>(savedTab());
-  // On a video the popup opens on its summary; elsewhere on the last settings tab.
-  let openedOnVideo = false;
+  // On a video the popup opens on its summary, and moves to it again when the
+  // tab goes to another video; elsewhere it shows the last settings tab.
+  let shownVideo: string | null = null;
   $effect(() => {
-    if (videoId && !openedOnVideo) {
-      openedOnVideo = true;
+    if (videoId && videoId !== shownVideo) {
+      shownVideo = videoId;
       tab = 'summary';
     } else if (!videoId && tab === 'summary') {
       tab = savedTab();

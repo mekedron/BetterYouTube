@@ -3,13 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BetterYouTube – Slop Filter: it's not your attention span</title>
-<meta name="description" content="A free browser extension that dims padded videos, tiny content farms, AI slop and Shorts nobody liked in your YouTube recommendations. Your time is worth respecting." />
-<meta property="og:title" content="BetterYouTube – Slop Filter: it's not your attention span. It's the padding." />
-<meta property="og:description" content="A free extension that dims the videos built to waste your time, so the ones worth it stand out." />
+<title data-i18n="metaTitle">BetterYouTube – Slop Filter: it's not your attention span</title>
+<meta name="description" data-i18n-content="metaDescription" content="A free browser extension that dims padded videos, tiny content farms, AI slop and Shorts nobody liked in your YouTube recommendations. Your time is worth respecting." />
+<meta property="og:title" data-i18n-content="ogTitle" content="BetterYouTube – Slop Filter: it's not your attention span. It's the padding." />
+<meta property="og:description" data-i18n-content="ogDescription" content="A free extension that dims the videos built to waste your time, so the ones worth it stand out." />
 <meta property="og:image" content="https://mekedron.github.io/BetterYouTube/images/og.png" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
+<!-- languages: written by scripts/build-landing.mjs -->
+<link rel="canonical" href="https://mekedron.github.io/BetterYouTube/" />
+<link rel="alternate" hreflang="en" href="https://mekedron.github.io/BetterYouTube/" />
+<link rel="alternate" hreflang="ru" href="https://mekedron.github.io/BetterYouTube/ru/" />
+<link rel="alternate" hreflang="x-default" href="https://mekedron.github.io/BetterYouTube/" />
+<!-- /languages -->
 <link rel="icon" type="image/png" href="images/icon-32.png" />
 <style>
   :root {
@@ -139,7 +145,9 @@
   .feed { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 16px; }
   @media (max-width: 720px) { .feed { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 440px) { .feed { gap: 16px 10px; } .video h3 { font-size: 13px; } .thumb { font-size: 13px; } .thumb.calm { font-size: 11.5px; } }
-  .video { transition: opacity 0.25s ease, filter 0.25s ease; }
+  .video { transition: opacity 0.25s ease, filter 0.25s ease; cursor: pointer; border-radius: 14px; }
+  .video:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .video.open .thumb { box-shadow: 0 0 0 3px var(--accent); }
   .video.dimmed { opacity: 0.2; filter: grayscale(1); }
   .video.dimmed:hover { opacity: 0.5; }
   .video.hidden { display: none; }
@@ -211,6 +219,8 @@
   footer { padding: 36px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
   footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
   footer a { color: var(--muted); }
+  footer .langs { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; }
+  footer .langs a[aria-current] { color: var(--ink); text-decoration: none; }
 </style>
 </head>
 <body>
@@ -244,8 +254,8 @@
       <p class="note" data-i18n="ctaNote">Free and open source. No account, no tracking. Chrome, Edge, Brave and other Chromium browsers; Firefox build included.</p>
       </div>
       <div class="stack" aria-hidden="true">
-        <div class="mini dim" style="--r:-7deg;--x:-34px;--y:8px"><div class="mini-thumb" style="background:linear-gradient(135deg,#ff0844,#ffb199)" data-i18n="heroCard1">YOU WON'T BELIEVE 😱</div><i></i><i class="short"></i></div>
-        <div class="mini" style="--r:2deg;--x:26px;--y:-18px"><div class="mini-thumb calm" style="background:linear-gradient(135deg,#2c3e50,#4ca1af)" data-i18n="heroCard2">A 30-minute talk worth every minute</div><i></i><i class="short"></i></div>
+        <div class="mini dim" style="--r:-7deg;--x:-34px;--y:8px"><div class="mini-thumb" style="background:linear-gradient(135deg,#ff0844,#ffb199)" data-i18n="heroCard1">I TRIED THIS FOR 30 DAYS 😱</div><i></i><i class="short"></i></div>
+        <div class="mini" style="--r:2deg;--x:26px;--y:-18px"><div class="mini-thumb calm" style="background:linear-gradient(135deg,#2c3e50,#4ca1af)" data-i18n="heroCard2">GDC 2014: An Indie Approach to Procedural Animation</div><i></i><i class="short"></i></div>
         <div class="mini dim" style="--r:-3deg;--x:-6px;--y:-40px"><div class="mini-thumb" style="background:linear-gradient(135deg,#7f00ff,#e100ff)" data-i18n="heroCard3">AI REPLACES YOU</div><i></i><i class="short"></i></div>
       </div>
     </div>
@@ -314,7 +324,7 @@
       <div class="demo-head">
         <div>
           <h2 data-i18n="demoTitle">Try it on a sample feed</h2>
-          <p data-i18n="demoText">This is the real extension popup. Move the sliders or switch to “Hidden” and watch the feed change. The videos and channels are made up.</p>
+          <p data-i18n="demoText">This is the real extension popup. Move the sliders or switch to “Hidden” and watch the feed change. Click a video to see its summary. The videos, channels and summaries are made up.</p>
         </div>
       </div>
       <div class="demo-grid">
@@ -406,6 +416,9 @@
   <div class="wrap">
     <span data-i18n="footer">Made by one indie developer. Not affiliated with YouTube or Google.</span>
     <span><a href="https://github.com/mekedron/BetterYouTube/blob/main/PRIVACY.md" data-i18n="privacyLink">Privacy</a> · MIT</span>
+    <!-- language-links: written by scripts/build-landing.mjs -->
+    <nav class="langs" aria-label="Language"><a href="./" hreflang="en" lang="en" aria-current="page">English</a> <a href="ru/" hreflang="ru" lang="ru">Русский</a></nav>
+    <!-- /language-links -->
   </div>
 </footer>
 
@@ -416,19 +429,38 @@
   const CHROME_STORE_URL = '';
   if (CHROME_STORE_URL) for (const a of document.querySelectorAll('[data-store="chrome"]')) a.href = CHROME_STORE_URL;
 
+  // Every language has its own page, written by scripts/build-landing.mjs:
+  // English at the root, the others in /<code>/. data-root leads back to the
+  // root from a language page.
+  const LANGS = window.LANDING_LANGUAGES;
+  const lang = document.documentElement.lang;
+  const ROOT = document.documentElement.dataset.root || '';
+  const strings = LANGS[lang]?.strings || {};
+
   // ---- Sample feed ----
-  // views and subs drive the filter exactly as the extension's thresholds do.
+  // views and subs drive the filter exactly as the extension's thresholds do;
+  // sum is the summary the demo popup "writes" for the video.
   const VIDEOS = [
-    { t: 'How we built procedural animation for our game: full talk', ch: 'Indie Dev Talks', views: 840e3, subs: 310e3, len: '31:12', th: 'Procedural animation, explained', bg: 'linear-gradient(135deg,#2c3e50,#4ca1af)', calm: true },
-    { t: 'I tried living on $1 a day for 30 days (SHOCKING ending)', ch: 'Max Challenges', views: 31e3, subs: 12e3, len: '24:51', th: 'I almost QUIT 😱', bg: 'linear-gradient(135deg,#ff0844,#ffb199)' },
-    { t: 'The math behind GPS, in 15 minutes', ch: 'Plain Physics', views: 2.1e6, subs: 1.9e6, len: '15:04', th: 'How your phone knows where you are', bg: 'linear-gradient(135deg,#1d4350,#a43931)', calm: true },
-    { t: '10 AI tools that will REPLACE your job in 2026', ch: 'FutureTech Daily AI', views: 4.2e3, subs: 900, len: '12:00', th: 'Your job is GONE', bg: 'linear-gradient(135deg,#7f00ff,#e100ff)' },
-    { t: 'What actually happens in your brain when you learn', ch: 'Open Lecture Hall', views: 650e3, subs: 1.4e6, len: '48:20', th: 'Lecture 4: Memory', bg: 'linear-gradient(135deg,#355c7d,#6c5b7b)', calm: true },
-    { t: 'Starfall Odyssey review: is it worth it? (no spoilers*)', ch: 'GameTalk Mike', views: 22e3, subs: 8e3, len: '21:37', th: 'HONEST REVIEW 🎮', bg: 'linear-gradient(135deg,#f7971e,#ffd200)' },
-    { t: 'Building a wooden boat, start to finish', ch: 'Slow Workshop', views: 3.4e6, subs: 2.2e6, len: '42:10', th: 'Two years in one video', bg: 'linear-gradient(135deg,#134e5e,#71b280)', calm: true },
-    { t: 'AI reads Reddit stories: 3 hour compilation', ch: 'Story Time Zone', views: 9e3, subs: 5e3, len: '3:02:44', th: 'AITA?? 🤯', bg: 'linear-gradient(135deg,#ee0979,#ff6a00)' },
-    { t: 'Fixing a bike chain in 4 minutes, no fluff', ch: 'Two Wheels', views: 120e3, subs: 64e3, len: '4:08', th: 'Chain fix, no fluff', bg: 'linear-gradient(135deg,#0f2027,#2c5364)', calm: true },
+    { t: 'How we built procedural animation for our game: full talk', ch: 'Indie Dev Talks', views: 840e3, subs: 310e3, len: '31:12', th: 'Procedural animation, explained', bg: 'linear-gradient(135deg,#2c3e50,#4ca1af)', calm: true,
+      sum: 'A developer shows how their game animates characters with physics and a handful of poses instead of hundreds of hand-made clips.\n\n- Walking and running blend two key poses per step, timed to the character’s speed.\n- Balance comes from physics, so characters stumble and recover on their own.\n- One person built the whole system in about a year, and the talk shows the code for each part.' },
+    { t: 'I tried living on $1 a day for 30 days (SHOCKING ending)', ch: 'Max Challenges', views: 31e3, subs: 12e3, len: '24:51', th: 'I almost QUIT 😱', bg: 'linear-gradient(135deg,#ff0844,#ffb199)',
+      sum: 'He tries to live on $1 a day and stops on day 9.\n\n- Days 1 to 8 are rice, oats and bananas. Most of the time goes to shopping trips and his reactions.\n- The “shocking ending” is that he quit and ordered pizza.\n- There are no budgeting tips. The last 4 minutes are a sponsor and a call to subscribe.' },
+    { t: 'The math behind GPS, in 15 minutes', ch: 'Plain Physics', views: 2.1e6, subs: 1.9e6, len: '15:04', th: 'How your phone knows where you are', bg: 'linear-gradient(135deg,#1d4350,#a43931)', calm: true,
+      sum: 'Your phone finds its place by timing signals from at least four satellites.\n\n- Each satellite sends the exact time, and the delay gives the distance to it.\n- Four distances fix the position and correct the phone’s own clock.\n- Without corrections for relativity, GPS would drift by about 10 km a day.' },
+    { t: '10 AI tools that will REPLACE your job in 2026', ch: 'FutureTech Daily AI', views: 4.2e3, subs: 900, len: '12:00', th: 'Your job is GONE', bg: 'linear-gradient(135deg,#7f00ff,#e100ff)',
+      sum: 'A list of ten AI tools, each described with lines from its own website, read by a synthetic voice.\n\n- No tool is shown doing real work.\n- Which jobs they replace is never said.\n- Every tool has an affiliate link in the description.' },
+    { t: 'What actually happens in your brain when you learn', ch: 'Open Lecture Hall', views: 650e3, subs: 1.4e6, len: '48:20', th: 'Lecture 4: Memory', bg: 'linear-gradient(135deg,#355c7d,#6c5b7b)', calm: true,
+      sum: 'A university lecture on how memories form and why some of them last.\n\n- During sleep, the day’s memories move from the hippocampus into long-term storage.\n- Recalling something strengthens it more than reading it again.\n- Practice spread over several days beats one long session.' },
+    { t: 'Starfall Odyssey review: is it worth it? (no spoilers*)', ch: 'GameTalk Mike', views: 22e3, subs: 8e3, len: '21:37', th: 'HONEST REVIEW 🎮', bg: 'linear-gradient(135deg,#f7971e,#ffd200)',
+      sum: 'Mostly a retelling of the first ten hours of the story, scene by scene.\n\n- Combat: “pretty fun”. No other opinion on the mechanics.\n- Performance, length and price are not mentioned.\n\nA plot retelling, not a review. The opinion takes about 40 seconds of 21 minutes.' },
+    { t: 'Building a wooden boat, start to finish', ch: 'Slow Workshop', views: 3.4e6, subs: 2.2e6, len: '42:10', th: 'Two years in one video', bg: 'linear-gradient(135deg,#134e5e,#71b280)', calm: true,
+      sum: 'Two years of building a 4.5-metre wooden sailing boat in one video.\n\n- The hull is cedar strips over moulds, glued and covered with fibreglass.\n- The hardest part was steaming oak for the ribs. The first batch cracked.\n- Materials cost about $6,000. Next time he would buy the sails instead of sewing them.' },
+    { t: 'AI reads Reddit stories: 3 hour compilation', ch: 'Story Time Zone', views: 9e3, subs: 5e3, len: '3:02:44', th: 'AITA?? 🤯', bg: 'linear-gradient(135deg,#ee0979,#ff6a00)',
+      sum: 'Three hours of Reddit posts read by a synthetic voice over stock footage.\n\n- 41 stories, with no comment on any of them.\n- The same stories run on several other channels under different thumbnails.\n- Reading them on Reddit takes a few minutes.' },
+    { t: 'Fixing a bike chain in 4 minutes, no fluff', ch: 'Two Wheels', views: 120e3, subs: 64e3, len: '4:08', th: 'Chain fix, no fluff', bg: 'linear-gradient(135deg,#0f2027,#2c5364)', calm: true,
+      sum: 'How to fix a broken bike chain with a chain tool.\n\n- Push the pin of the damaged link out, but not all the way.\n- Shorten the chain by one link, or put in a quick link.\n- Before riding, check that the joined link bends freely.' },
   ];
+  const FOLLOW_UP = 'This is a demo, so there is no real transcript behind it. In the extension, the model answers your question from what the video actually says.';
   const DEFAULT_SETTINGS = {
     enabled: true,
     feed: {
@@ -439,12 +471,13 @@
     },
   };
   let settings = DEFAULT_SETTINGS;
-  let lang = 'en';
+  let openVideo = -1;
 
-  const compact = () => new Intl.NumberFormat(lang, { notation: 'compact', maximumFractionDigits: 1 });
+  const seconds = (len) => len.split(':').reduce((total, part) => total * 60 + Number(part), 0);
+
   function renderFeed() {
-    const fmt = compact();
-    const viewsWord = (LANGS[lang].strings || {}).views || 'views';
+    const fmt = new Intl.NumberFormat(lang, { notation: 'compact', maximumFractionDigits: 1 });
+    const viewsWord = strings.views || 'views';
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
     let filtered = 0;
@@ -456,33 +489,49 @@
       const hit = on && (low || small);
       if (hit) filtered++;
       const el = document.createElement('article');
-      el.className = 'video' + (hit ? (f.action === 'hide' ? ' hidden' : ' dimmed') : '');
+      el.className = 'video' + (hit ? (f.action === 'hide' ? ' hidden' : ' dimmed') : '') + (i === openVideo ? ' open' : '');
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
       el.innerHTML = `<div class="thumb${v.calm ? ' calm' : ''}" style="background:${v.bg}"><span></span><span class="len"></span></div><h3></h3><div class="meta"></div>`;
-      el.querySelector('.thumb span').textContent = ((LANGS[lang].strings || {}).videoThumbs || [])[i] || v.th;
+      el.querySelector('.thumb span').textContent = (strings.videoThumbs || [])[i] || v.th;
       el.querySelector('.len').textContent = v.len;
-      el.querySelector('h3').textContent = ((LANGS[lang].strings || {}).videoTitles || [])[i] || v.t;
+      el.querySelector('h3').textContent = (strings.videoTitles || [])[i] || v.t;
       el.querySelector('.meta').textContent = `${v.ch} · ${fmt.format(v.views)} ${viewsWord}`;
+      el.addEventListener('click', () => openSample(i));
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openSample(i);
+        }
+      });
       feed.appendChild(el);
     }
     demoStats = { filteredCards: filtered, skippedShorts: 0 };
     sendStats();
   }
 
-  // The popup shows these as "on this tab"; it reloads with every language
-  // switch, so it gets them again on load.
+  // Makes a sample video the popup's "open tab"; the popup then moves to its
+  // Summary tab within a second and writes the summary.
+  function openSample(i) {
+    const v = VIDEOS[i];
+    openVideo = i;
+    for (const [n, el] of document.querySelectorAll('#feed .video').entries()) el.classList.toggle('open', n === i);
+    const frame = document.getElementById('popup');
+    frame.contentWindow?.postMessage({
+      type: 'byt-demo-video',
+      video: { videoId: `sample-${i}`, title: (strings.videoTitles || [])[i] || v.t, channel: v.ch, lengthSeconds: seconds(v.len) },
+      summary: (strings.videoSummaries || [])[i] || v.sum,
+      followUp: strings.demoFollowUp || FOLLOW_UP,
+    }, '*');
+    // On narrow screens the popup sits above the feed, out of sight.
+    const box = frame.getBoundingClientRect();
+    if (box.bottom < 0 || box.top > innerHeight) frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // The popup shows these as "on this tab".
   let demoStats = { filteredCards: 0, skippedShorts: 0 };
   function sendStats() {
     document.getElementById('popup').contentWindow?.postMessage({ type: 'byt-demo-stats', stats: demoStats }, '*');
-  }
-
-  // A fresh frame for every language: a reloaded page restores a frame's
-  // previous address, which would keep the popup in the old language.
-  function loadPopup(code) {
-    const old = document.getElementById('popup');
-    const frame = old.cloneNode(false);
-    frame.src = `demo/index.html?lang=${code}`;
-    frame.addEventListener('load', sendStats);
-    old.replaceWith(frame);
   }
 
   window.addEventListener('message', (event) => {
@@ -492,41 +541,48 @@
   });
 
   // ---- Language ----
-  const LANGS = window.LANDING_LANGUAGES;
-  const english = {};
-  for (const el of document.querySelectorAll('[data-i18n]')) english[el.dataset.i18n] = el.innerHTML;
+  const pageFor = (code) => ROOT + (code === 'en' ? '' : `${code}/`) || './';
+  function remember(code) {
+    try { localStorage.setItem('lang', code); } catch {}
+  }
   const menu = document.getElementById('lang');
   for (const [code, { name }] of Object.entries(LANGS)) menu.add(new Option(name, code));
+  menu.value = lang;
+  menu.addEventListener('change', () => {
+    remember(menu.value);
+    location.href = pageFor(menu.value);
+  });
+  for (const a of document.querySelectorAll('footer .langs a')) a.addEventListener('click', () => remember(a.hreflang));
 
-  function setLang(next, remember) {
-    lang = next;
-    document.documentElement.lang = next;
-    menu.value = next;
-    const dict = LANGS[next].strings || {};
-    for (const el of document.querySelectorAll('[data-i18n]')) {
-      el.innerHTML = dict[el.dataset.i18n] ?? english[el.dataset.i18n];
-    }
-    // A new popup starts from the default settings, and so does the feed.
-    settings = DEFAULT_SETTINGS;
-    loadPopup(next);
-    renderFeed();
-    if (remember) try { localStorage.setItem('lang', next); } catch {}
-  }
-  menu.addEventListener('change', () => setLang(menu.value, true));
-
-  // The first of the browser's preferred languages that has a translation.
-  function preferredLang() {
+  // The root page sends a first-time visitor on to their language, once.
+  // Search engines get every language at its own address either way.
+  if (!ROOT) {
+    let target = null;
     try {
       const saved = localStorage.getItem('lang');
-      if (saved && LANGS[saved]) return saved;
+      if (saved) target = saved;
     } catch {}
-    for (const tag of navigator.languages || [navigator.language]) {
-      const code = tag.toLowerCase().split('-')[0];
-      if (LANGS[code]) return code;
+    if (!target) {
+      for (const tag of navigator.languages || [navigator.language]) {
+        const code = tag.toLowerCase().split('-')[0];
+        if (LANGS[code]) {
+          target = code;
+          break;
+        }
+      }
     }
-    return 'en';
+    if (target && target !== 'en' && LANGS[target]) location.replace(pageFor(target));
   }
-  setLang(preferredLang(), false);
+
+  // A fresh frame, so a reloaded page never restores an old address in it.
+  (function loadPopup() {
+    const old = document.getElementById('popup');
+    const frame = old.cloneNode(false);
+    frame.src = `${ROOT}demo/index.html?lang=${lang}`;
+    frame.addEventListener('load', sendStats);
+    old.replaceWith(frame);
+  })();
+  renderFeed();
 </script>
 </body>
 </html>

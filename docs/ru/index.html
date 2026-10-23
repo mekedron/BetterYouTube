@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="ru" data-root="../">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title data-i18n="metaTitle">BetterYouTube – Slop Filter: дело не в вашем внимании</title>
+<meta name="description" data-i18n-content="metaDescription" content="Бесплатное расширение для браузера. Приглушает в рекомендациях YouTube видео с водой, крошечные контент-фермы, AI-мусор и Shorts, которые никому не понравились, и пересказывает видео по расшифровке. Ваше время стоит уважения." />
+<meta property="og:title" data-i18n-content="ogTitle" content="BetterYouTube – Slop Filter: дело не в вашем внимании. Дело в воде." />
+<meta property="og:description" data-i18n-content="ogDescription" content="Бесплатное расширение, которое приглушает видео, сделанные, чтобы потратить ваше время. Видео, которые того стоят, снова заметны." />
+<meta property="og:image" content="https://mekedron.github.io/BetterYouTube/images/og.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<!-- languages: written by scripts/build-landing.mjs -->
+<link rel="canonical" href="https://mekedron.github.io/BetterYouTube/ru/" />
+<link rel="alternate" hreflang="en" href="https://mekedron.github.io/BetterYouTube/" />
+<link rel="alternate" hreflang="ru" href="https://mekedron.github.io/BetterYouTube/ru/" />
+<link rel="alternate" hreflang="x-default" href="https://mekedron.github.io/BetterYouTube/" />
+<!-- /languages -->
+<link rel="icon" type="image/png" href="../images/icon-32.png" />
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f4ef;
+    --bg-2: #ece8df;
+    --card: #ffffff;
+    --ink: #16131b;
+    --body: #3d3844;
+    --muted: #77707f;
+    --line: rgba(22, 19, 27, 0.1);
+    --accent: #e98500;
+    --accent-ink: #a65d00;
+    --accent-soft: rgba(233, 133, 0, 0.13);
+    --shadow: 0 20px 50px rgba(22, 19, 27, 0.1);
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #100e13;
+      --bg-2: #18151c;
+      --card: #1d1a22;
+      --ink: #f4f1f7;
+      --body: #cfcad6;
+      --muted: #918b9b;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: #ffa62b;
+      --accent-ink: #ffc46b;
+      --accent-soft: rgba(255, 166, 43, 0.14);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font: 400 17px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+  .wrap { width: min(1120px, 100% - 32px); margin: 0 auto; }
+
+  /* ---- Top bar ---- */
+  .top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top .wrap { display: flex; align-items: center; gap: 14px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 700; text-decoration: none; letter-spacing: -0.01em; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; }
+  .top nav { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--ink); }
+  .lang select { appearance: none; border: 1px solid var(--line); border-radius: 9px; background: var(--card); color: var(--ink); font: 600 13px/1 var(--sans); padding: 7px 26px 7px 10px; cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: right 12px top 50%, right 8px top 50%; background-size: 4px 4px; background-repeat: no-repeat; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (max-width: 640px) { .top nav a.hide-sm { display: none; } }
+
+  /* ---- Hero ---- */
+  .hero { padding: 96px 0 72px; overflow: hidden; }
+  .kicker { display: inline-flex; align-items: center; gap: 8px; color: var(--accent-ink); font: 600 14px/1 var(--sans); letter-spacing: 0.04em; text-transform: uppercase; }
+  .kicker::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  h1 {
+    margin: 22px 0 0;
+    color: var(--ink);
+    font: 800 clamp(42px, 7.4vw, 92px)/0.98 var(--sans);
+    letter-spacing: -0.045em;
+    max-width: 14ch;
+  }
+  h1 .strike { color: var(--muted); font-weight: 700; text-decoration: line-through 0.09em var(--accent); text-decoration-skip-ink: none; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { max-width: 640px; margin: 28px 0 0; font-size: clamp(18px, 2vw, 21px); line-height: 1.55; color: var(--body); }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 20px; border-radius: 12px;
+    font: 650 16px/1 var(--sans); text-decoration: none;
+    border: 1px solid var(--line); color: var(--ink); background: var(--card);
+  }
+  .btn.primary { background: var(--ink); color: var(--bg); border-color: transparent; }
+  .btn small { font-weight: 500; opacity: 0.7; }
+  .btn svg { width: 20px; height: 20px; }
+  .note { margin-top: 14px; color: var(--muted); font-size: 14px; }
+
+  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } .stack { display: none; } }
+  .stack { display: grid; justify-items: center; }
+  .mini {
+    width: min(290px, 100%); padding: 11px; border-radius: 18px; background: var(--card);
+    border: 1px solid var(--line); box-shadow: var(--shadow);
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+    transition: opacity .3s ease, filter .3s ease;
+  }
+  .mini + .mini { margin-top: -34px; }
+  .mini:nth-child(2) { position: relative; z-index: 2; }
+  .mini.dim { opacity: .28; filter: grayscale(1); }
+  .mini-thumb { aspect-ratio: 16/9; border-radius: 11px; display: grid; place-items: center; padding: 14px; text-align: center; color: #fff; font: 850 22px/1.05 var(--sans); letter-spacing: -.02em; text-shadow: 0 2px 10px rgba(0,0,0,.35); }
+  .mini-thumb.calm { font: 650 18px/1.25 var(--sans); text-shadow: none; }
+  .mini i { display: block; height: 9px; margin-top: 10px; border-radius: 5px; background: var(--line); }
+  .mini i.short { width: 55%; margin-top: 7px; }
+
+  /* ---- Manifesto ---- */
+  .manifesto { padding: 72px 0; border-top: 1px solid var(--line); }
+  .manifesto .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 56px; align-items: start; }
+  @media (max-width: 860px) { .manifesto .grid { grid-template-columns: 1fr; gap: 24px; } }
+  h2 { margin: 0; color: var(--ink); font: 780 clamp(30px, 4.2vw, 48px)/1.05 var(--sans); letter-spacing: -0.035em; }
+  .manifesto p { margin: 0 0 18px; }
+  .manifesto blockquote {
+    margin: 30px 0 0; padding: 0 0 0 22px; border-left: 3px solid var(--accent);
+    color: var(--ink); font: 400 clamp(21px, 2.4vw, 26px)/1.4 var(--serif); font-style: italic;
+  }
+
+  /* ---- Demo ---- */
+  .demo { padding: 80px 0; background: var(--bg-2); }
+  .demo-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 30px; }
+  .demo-head p { margin: 10px 0 0; max-width: 560px; color: var(--muted); }
+  .demo-grid { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .demo-grid { grid-template-columns: 1fr; } .demo-grid .popup-frame { justify-self: center; order: -1; position: static; } }
+  .feed { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 16px; }
+  @media (max-width: 720px) { .feed { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 440px) { .feed { gap: 16px 10px; } .video h3 { font-size: 13px; } .thumb { font-size: 13px; } .thumb.calm { font-size: 11.5px; } }
+  .video { transition: opacity 0.25s ease, filter 0.25s ease; cursor: pointer; border-radius: 14px; }
+  .video:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .video.open .thumb { box-shadow: 0 0 0 3px var(--accent); }
+  .video.dimmed { opacity: 0.2; filter: grayscale(1); }
+  .video.dimmed:hover { opacity: 0.5; }
+  .video.hidden { display: none; }
+  .thumb {
+    position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden;
+    display: grid; place-items: center; padding: 10px; text-align: center;
+    color: #fff; font: 850 clamp(15px, 1.7vw, 21px)/1.05 var(--sans); letter-spacing: -0.02em; text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,.35);
+  }
+  .thumb.calm { text-transform: none; font-weight: 650; font-size: clamp(13px, 1.3vw, 16px); text-shadow: none; }
+  .thumb .len { position: absolute; right: 7px; bottom: 7px; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,.75); font: 600 11px/1.2 var(--sans); text-transform: none; letter-spacing: 0; text-shadow: none; }
+  .video h3 { margin: 10px 0 2px; color: var(--ink); font: 600 14.5px/1.35 var(--sans); }
+  .video .meta { color: var(--muted); font-size: 13px; line-height: 1.4; }
+  .popup-frame {
+    width: 360px; max-width: 100%; height: 590px; border: 0; border-radius: 18px;
+    box-shadow: var(--shadow); background: var(--bg);
+    position: sticky; top: 84px;
+  }
+
+  /* ---- Facts ---- */
+  .facts { padding: 72px 0 88px; border-top: 1px solid var(--line); }
+  .facts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+  @media (max-width: 960px) { .facts-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .facts-grid { grid-template-columns: 1fr; } }
+  .fact { display: flex; flex-direction: column; padding: 24px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
+  .fact .big { color: var(--ink); font: 820 44px/1 var(--sans); letter-spacing: -0.04em; }
+  .fact .big span { color: var(--accent); }
+  .fact h3 { margin: 14px 0 8px; color: var(--ink); font: 650 17px/1.35 var(--sans); }
+  .fact p { margin: 0 0 16px; font-size: 15px; line-height: 1.55; }
+  .fact .src { margin-top: auto; color: var(--muted); font-size: 13px; line-height: 1.45; }
+  .fact .src a { color: var(--muted); }
+  .fact .src a:hover { color: var(--ink); }
+  .respect { margin-top: 28px; padding: 20px 22px; border-radius: 16px; background: var(--accent-soft); color: var(--ink); font-size: 16px; }
+
+  /* ---- Features ---- */
+  .features { padding: 88px 0; border-top: 1px solid var(--line); }
+  .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 36px; }
+  @media (max-width: 760px) { .feat-grid { grid-template-columns: 1fr; } }
+  .feat { padding: 26px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
+  .feat .icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--accent-soft); color: var(--accent-ink); }
+  .feat .icon svg { width: 22px; height: 22px; }
+  .feat h3 { margin: 16px 0 6px; color: var(--ink); font: 680 19px/1.3 var(--sans); }
+  .feat p { margin: 0; font-size: 15.5px; }
+  .honest { margin-top: 24px; color: var(--muted); font-size: 15px; max-width: 760px; }
+
+  /* ---- Next ---- */
+  .next { padding: 80px 0; background: var(--ink); color: var(--bg); }
+  .next .wrap { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 860px) { .next .wrap { grid-template-columns: 1fr; } }
+  .next h2 { color: var(--bg); }
+  .next p { color: color-mix(in srgb, var(--bg) 78%, transparent); margin: 16px 0 0; }
+  .badge { display: inline-block; margin-bottom: 16px; padding: 5px 10px; border-radius: 999px; background: var(--accent); color: #1a1205; font: 700 12px/1 var(--sans); letter-spacing: 0.05em; text-transform: uppercase; }
+  .tldr { padding: 22px; border-radius: 18px; background: color-mix(in srgb, var(--bg) 8%, transparent); border: 1px solid color-mix(in srgb, var(--bg) 14%, transparent); }
+  .tldr .label { color: var(--accent); font: 700 13px/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; }
+  .tldr ul { margin: 14px 0 0; padding-left: 18px; color: color-mix(in srgb, var(--bg) 88%, transparent); font-size: 15.5px; }
+  .tldr li + li { margin-top: 6px; }
+  .tldr .verdict { margin-top: 14px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--bg) 14%, transparent); font-size: 14px; color: color-mix(in srgb, var(--bg) 70%, transparent); }
+
+  /* ---- Privacy + install ---- */
+  .privacy { padding: 88px 0; }
+  .privacy .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  @media (max-width: 760px) { .privacy .grid { grid-template-columns: 1fr; } }
+  .privacy .item { padding: 22px; border-radius: 16px; border: 1px solid var(--line); }
+  .privacy .item b { display: block; color: var(--ink); margin-bottom: 4px; }
+  .privacy .item span { font-size: 15px; }
+  .install { margin-top: 56px; padding: 40px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); text-align: center; }
+  .install .cta { justify-content: center; }
+
+  footer { padding: 36px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  footer a { color: var(--muted); }
+  footer .langs { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; }
+  footer .langs a[aria-current] { color: var(--ink); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="../images/icon-128.png" alt="" />BetterYouTube</a>
+    <nav>
+      <a class="hide-sm" href="#demo" data-i18n="navDemo">Попробовать</a>
+      <a class="hide-sm" href="#why" data-i18n="navWhy">Зачем</a>
+      <a href="https://github.com/mekedron/BetterYouTube">GitHub</a>
+      <label class="lang"><span class="sr">Language</span><select id="lang" aria-label="Language"></select></label>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+      <span class="kicker" data-i18n="kicker">Расширение для YouTube</span>
+      <h1 data-i18n="h1">Дело не в вашем <span class="strike">внимании</span>. Дело в <em>воде</em>.</h1>
+      <p class="lede" data-i18n="lede">BetterYouTube приглушает видео, сделанные, чтобы потратить ваше время: воду с кричащим превью, крошечные контент-фермы, AI-мусор и Shorts, которые никому не понравились. Видео, которые стоят вашего вечера, снова заметны.</p>
+      <div class="cta">
+        <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 8h9M8.5 14 4 6.3M15.5 14 11 21.8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <span data-i18n="ctaChrome">Установить в Chrome</span>
+        </a>
+        <a class="btn" href="#demo"><span data-i18n="ctaDemo">Попробовать настройки</span></a>
+      </div>
+      <p class="note" data-i18n="ctaNote">Бесплатно и с открытым кодом. Без аккаунта и без слежки. Chrome, Edge, Brave и другие браузеры на Chromium; есть сборка для Firefox.</p>
+      </div>
+      <div class="stack" aria-hidden="true">
+        <div class="mini dim" style="--r:-7deg;--x:-34px;--y:8px"><div class="mini-thumb" style="background:linear-gradient(135deg,#ff0844,#ffb199)" data-i18n="heroCard1">Я ПРОБОВАЛ ЭТО 30 ДНЕЙ 😱</div><i></i><i class="short"></i></div>
+        <div class="mini" style="--r:2deg;--x:26px;--y:-18px"><div class="mini-thumb calm" style="background:linear-gradient(135deg,#2c3e50,#4ca1af)" data-i18n="heroCard2">GDC 2014: процедурная анимация силами инди-студии</div><i></i><i class="short"></i></div>
+        <div class="mini dim" style="--r:-3deg;--x:-6px;--y:-40px"><div class="mini-thumb" style="background:linear-gradient(135deg,#7f00ff,#e100ff)" data-i18n="heroCard3">НЕЙРОСЕТЬ ЗАМЕНИТ ТЕБЯ</div><i></i><i class="short"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts">
+    <div class="wrap">
+      <h2 data-i18n="factsTitle">Что на самом деле говорят исследования</h2>
+      <div class="facts-grid">
+        <article class="fact">
+          <div class="big">8<span> s</span></div>
+          <h3 data-i18n="f1Title">«Внимание как у золотой рыбки» не подтверждено ни одним исследованием</h3>
+          <p data-i18n="f1Text">В 2015 году заголовки писали, что наше внимание упало до 8 секунд, ниже 9 секунд у золотой рыбки. BBC проследила, откуда взялась цифра, и не нашла за ней исследования. Учёные, с которыми говорила BBC, назвали «среднюю продолжительность внимания» бессмысленной: внимание зависит от задачи.</p>
+          <div class="src"><a href="https://www.bbc.com/news/health-38896790">BBC News: Busting the attention span myth</a> · <a href="https://time.com/3858309/attention-spans-goldfish/">Time, 2015</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">47<span> s</span></div>
+          <h3 data-i18n="f2Title">Пугающая цифра — про переключение экранов, а не про просмотр</h3>
+          <p data-i18n="f2Text">Глория Марк выяснила, что люди переключаются между экранами примерно каждые 47 секунд, а в 2004 году — раз в 2,5 минуты. Это про вкладки и уведомления на работе. Это ничего не говорит о том, можете ли вы смотреть хорошее видео.</p>
+          <div class="src"><a href="https://www.universityofcalifornia.edu/news/how-sharpen-your-attention-and-meet-your-goals-2024">University of California, 2024</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">2012</div>
+          <h3 data-i18n="f3Title">YouTube начал платить за минуты</h3>
+          <p data-i18n="f3Text">В 2012 году YouTube сделал время просмотра главным сигналом для рекомендаций. С 2020 года рекламу в середину ролика можно ставить уже в видео от 8 минут. Система награждает просмотренные минуты, а не то, что вы из них узнали.</p>
+          <div class="src"><a href="https://youtubecreator-uk.googleblog.com/2012/09/youtube-now-why-we-focus-on-watch-time.html">YouTube Creator Blog, 2012</a> · <a href="https://www.tubefilter.com/2020/07/07/youtube-lowering-minimum-video-length-mid-roll-ads/">Tubefilter, 2020</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">85<span>%</span></div>
+          <h3 data-i18n="f4Title">Люди хотят более плотные видео, а не более короткие</h3>
+          <p data-i18n="f4Text">Когда зрители меняют скорость, в 85% случаев они её ускоряют. Так зрители экономят больше 900 лет просмотра каждый день. Это не короткое внимание. Это люди пропускают воду.</p>
+          <div class="src"><a href="https://blog.youtube/inside-youtube/youtube-watch-video-playback-speeds-trends">YouTube Official Blog, 2022</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">21<span>%</span></div>
+          <h3 data-i18n="f5Title">AI-мусор уже в ленте</h3>
+          <p data-i18n="f5Text">Kapwing завёл новый аккаунт и проверил первые 500 Shorts, которые ему показали. 104 из них, примерно каждый пятый, были сгенерированы нейросетью. В 2025 году YouTube переименовал правило о «повторяющемся и массовом» контенте в правило о «неаутентичном контенте».</p>
+          <div class="src"><a href="https://www.kapwing.com/blog/ai-slop-report-the-global-rise-of-low-quality-ai-videos/">Kapwing, 2025</a> · <a href="https://support.google.com/youtube/answer/1311392">YouTube Partner Program policies</a></div>
+        </article>
+        <article class="fact">
+          <div class="big">52<span>%</span></div>
+          <h3 data-i18n="f6Title">Половина популярных видео про СДВГ в TikTok вводила в заблуждение</h3>
+          <p data-i18n="f6Text">Исследование 2022 года разобрало 100 самых популярных видео про СДВГ в TikTok. 52 вводили в заблуждение, полезными были только 21. Лента, полная воды, и лента, полная самодиагнозов, подпитывают друг друга.</p>
+          <div class="src"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9659797/">Canadian Journal of Psychiatry, 2022</a></div>
+        </article>
+      </div>
+      <p class="respect" data-i18n="respect">СДВГ существует, и ему нужна настоящая диагностика у специалиста. Эта страница не об этом. Она о людях, которым сказали, что с их мозгом что-то не так, хотя плохим было видео.</p>
+    </div>
+  </section>
+
+  <section class="manifesto" id="why">
+    <div class="wrap grid">
+      <h2 data-i18n="manifestoTitle">Каждый клик — это обмен. Ваше время на их время просмотра.</h2>
+      <div>
+        <p data-i18n="manifestoP1">Всё больше людей решают, что не могут сосредоточиться, раз двадцатиминутное видео тянулось бесконечно. Часто дело не в зрителе. Дело в видео, растянутом до нужной длины: три минуты сути и семнадцать минут вступлений, повторов и «прежде чем начнём».</p>
+        <p data-i18n="manifestoReview">А вот что бесит больше всего. Вы ищете обзор игры, потому что хотите мнение: как ощущается боевая система, какие механики интересные, стоит ли она ваших выходных. Открываете двадцатиминутный «обзор», а там нарезка собственного прохождения автора с пересказом: тут идём налево, тут открываем сундук, тут у босса вторая фаза. Это не обзор. Это пересказ, растянутый потому, что длинное лучше оплачивается.</p>
+        <p data-i18n="manifestoP2">Длина — не враг. Тридцатиминутный доклад разработчика игр о том, как они строили систему анимации, может стоить каждой секунды. Как и хорошая лекция. Время крадёт вода, которую продают испуганным лицом на превью и заголовком, обещающим то, чего в видео нет. Это dark pattern, и он работает на всех.</p>
+        <p data-i18n="manifestoP3">Выбирая видео, вы отдаёте автору часть своей жизни. BetterYouTube помогает отдавать её тем, кто это уважает.</p>
+        <blockquote data-i18n="quote">Время — самое ценное, что у меня есть. Уважение должно быть взаимным.</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <div class="demo-head">
+        <div>
+          <h2 data-i18n="demoTitle">Попробуйте на примере ленты</h2>
+          <p data-i18n="demoText">Это настоящий поп-ап расширения. Подвигайте ползунки или выберите «Скрывать», и лента изменится. Нажмите на видео, чтобы увидеть пересказ. Видео, каналы и пересказы выдуманы.</p>
+        </div>
+      </div>
+      <div class="demo-grid">
+        <div class="feed" id="feed"></div>
+        <iframe class="popup-frame" id="popup" title="BetterYouTube popup"></iframe>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="features">
+    <div class="wrap">
+      <h2 data-i18n="featTitle">Что оно делает</h2>
+      <div class="feat-grid">
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3 data-i18n="feat1Title">Приглушает видео, которые почти никто не смотрел</h3>
+          <p data-i18n="feat1Text">На главной, в колонке справа от видео и, если хотите, в поиске. Порог выбираете вы: по умолчанию 50 тыс. просмотров, можно от 1 тыс. до 5 млн.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3 data-i18n="feat2Title">Замечает крошечные каналы и контент-фермы</h3>
+          <p data-i18n="feat2Text">На карточках нет числа подписчиков, поэтому расширение один раз спрашивает его у YouTube и помнит неделю. Каналы, на которые вы подписаны, не трогаются никогда.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></div>
+          <h3 data-i18n="feat3Title">Пропускает Shorts, которые никому не понравились</h3>
+          <p data-i18n="feat3Text">Убирает полки Shorts с главной. В плеере Shorts ролик с меньшим числом лайков, чем вы задали, закрывается, ставится на паузу и без звука, и вы листаете дальше, не услышав ни секунды.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/><path d="m17 15 2 2 3-4"/></svg></div>
+          <h3 data-i18n="feat5Title">Смотрит видео, чтобы вам не пришлось</h3>
+          <p data-i18n="feat5Text">Откройте его на любом видео и получите суть, по расшифровке. Не уверены, есть ли там то, что вам нужно? Спросите. Ответ строится на том, что действительно сказано, а не на превью.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><path d="m8 9 2 2-2 2M13 13h3"/></svg></div>
+          <h3 data-i18n="feat6Title">Ваш собственный AI</h3>
+          <p data-i18n="feat6Text">Встроенный AI Chrome работает сразу, бесплатно и без интернета. Уже платите за Claude Code, Codex или Gemini CLI? Пусть поработают. Или вставьте ключ от OpenAI, Anthropic, Google или OpenRouter, или подключите свой Ollama.</p>
+        </article>
+        <article class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></div>
+          <h3 data-i18n="feat4Title">Ваши правила, на вашем языке</h3>
+          <p data-i18n="feat4Text">Приглушать или скрывать, на каких страницах, какие пороги, пауза одним переключателем. Светлая или тёмная тема и язык браузера, новые переводы на подходе.</p>
+        </article>
+      </div>
+      <p class="honest" data-i18n="honest">Честная оговорка: просмотры — грубый сигнал. Отличное новое видео тоже начинает с нуля. Поэтому по умолчанию видео приглушаются, а не скрываются, и при наведении снова видны.</p>
+    </div>
+  </section>
+
+  <section class="next">
+    <div class="wrap">
+      <div>
+        <h2 data-i18n="nextTitle">Узнайте, что внутри, до того как нажать play</h2>
+        <p data-i18n="nextText">Двадцать минут видео. Три минуты сути. Узнайте, где что, за пять секунд. Откройте расширение на любом видео: оно выдаст суть и ответит на любой вопрос о нём. Больше не нужно досматривать до конца, чтобы узнать, что конца не было.</p>
+      </div>
+      <div class="tldr" aria-hidden="true">
+        <div class="label">TL;DR</div>
+        <ul>
+          <li data-i18n="tldr1">Видео пересказывает первые десять часов сюжета, сцену за сценой.</li>
+          <li data-i18n="tldr2">Боевая система: «довольно весело». Других мнений о механиках нет.</li>
+          <li data-i18n="tldr3">О производительности, длине и цене ни слова.</li>
+        </ul>
+        <div class="verdict" data-i18n="tldrVerdict">Пересказ сюжета, а не обзор. Мнение: около 40 секунд из 21 минуты.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy">
+    <div class="wrap">
+      <h2 data-i18n="privacyTitle">Нам ничего не уходит</h2>
+      <div class="grid">
+        <div class="item"><b data-i18n="p1Title">Без серверов</b><span data-i18n="p1Text">У расширения нет своего сервера. Встроенный AI Chrome и ваши агенты работают на вашем компьютере. Облачный AI, если вы его выберете, получает расшифровку с вашим ключом, и больше никто.</span></div>
+        <div class="item"><b data-i18n="p2Title">Без слежки</b><span data-i18n="p2Text">Без аналитики, аккаунтов и рекламы. Настройки синхронизируются через ваш собственный профиль браузера.</span></div>
+        <div class="item"><b data-i18n="p3Title">Только один сайт</b><span data-i18n="p3Text">Работает на youtube.com и больше нигде, с единственным разрешением «storage» для настроек.</span></div>
+      </div>
+      <div class="install">
+        <h2 data-i18n="installTitle">Отдавайте своё время тем, кто его уважает</h2>
+        <div class="cta">
+          <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest"><span data-i18n="ctaChrome">Установить в Chrome</span></a>
+          <a class="btn" href="https://github.com/mekedron/BetterYouTube"><span data-i18n="ctaSource">Код на GitHub</span></a>
+          <a class="btn" href="https://buymeacoffee.com/mekedron"><span data-i18n="ctaCoffee">Купить мне кофе</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="footer">Сделано одним независимым разработчиком. Не связано с YouTube и Google.</span>
+    <span><a href="https://github.com/mekedron/BetterYouTube/blob/main/PRIVACY.md" data-i18n="privacyLink">Конфиденциальность</a> · MIT</span>
+    <!-- language-links: written by scripts/build-landing.mjs -->
+    <nav class="langs" aria-label="Language"><a href="../" hreflang="en" lang="en">English</a> <a href="../ru/" hreflang="ru" lang="ru" aria-current="page">Русский</a></nav>
+    <!-- /language-links -->
+  </div>
+</footer>
+
+<script src="../i18n.js"></script>
+<script>
+  // The Chrome Web Store link, once the listing is live. Until then the
+  // buttons point to the latest GitHub release.
+  const CHROME_STORE_URL = '';
+  if (CHROME_STORE_URL) for (const a of document.querySelectorAll('[data-store="chrome"]')) a.href = CHROME_STORE_URL;
+
+  // Every language has its own page, written by scripts/build-landing.mjs:
+  // English at the root, the others in /<code>/. data-root leads back to the
+  // root from a language page.
+  const LANGS = window.LANDING_LANGUAGES;
+  const lang = document.documentElement.lang;
+  const ROOT = document.documentElement.dataset.root || '';
+  const strings = LANGS[lang]?.strings || {};
+
+  // ---- Sample feed ----
+  // views and subs drive the filter exactly as the extension's thresholds do;
+  // sum is the summary the demo popup "writes" for the video.
+  const VIDEOS = [
+    { t: 'How we built procedural animation for our game: full talk', ch: 'Indie Dev Talks', views: 840e3, subs: 310e3, len: '31:12', th: 'Procedural animation, explained', bg: 'linear-gradient(135deg,#2c3e50,#4ca1af)', calm: true,
+      sum: 'A developer shows how their game animates characters with physics and a handful of poses instead of hundreds of hand-made clips.\n\n- Walking and running blend two key poses per step, timed to the character’s speed.\n- Balance comes from physics, so characters stumble and recover on their own.\n- One person built the whole system in about a year, and the talk shows the code for each part.' },
+    { t: 'I tried living on $1 a day for 30 days (SHOCKING ending)', ch: 'Max Challenges', views: 31e3, subs: 12e3, len: '24:51', th: 'I almost QUIT 😱', bg: 'linear-gradient(135deg,#ff0844,#ffb199)',
+      sum: 'He tries to live on $1 a day and stops on day 9.\n\n- Days 1 to 8 are rice, oats and bananas. Most of the time goes to shopping trips and his reactions.\n- The “shocking ending” is that he quit and ordered pizza.\n- There are no budgeting tips. The last 4 minutes are a sponsor and a call to subscribe.' },
+    { t: 'The math behind GPS, in 15 minutes', ch: 'Plain Physics', views: 2.1e6, subs: 1.9e6, len: '15:04', th: 'How your phone knows where you are', bg: 'linear-gradient(135deg,#1d4350,#a43931)', calm: true,
+      sum: 'Your phone finds its place by timing signals from at least four satellites.\n\n- Each satellite sends the exact time, and the delay gives the distance to it.\n- Four distances fix the position and correct the phone’s own clock.\n- Without corrections for relativity, GPS would drift by about 10 km a day.' },
+    { t: '10 AI tools that will REPLACE your job in 2026', ch: 'FutureTech Daily AI', views: 4.2e3, subs: 900, len: '12:00', th: 'Your job is GONE', bg: 'linear-gradient(135deg,#7f00ff,#e100ff)',
+      sum: 'A list of ten AI tools, each described with lines from its own website, read by a synthetic voice.\n\n- No tool is shown doing real work.\n- Which jobs they replace is never said.\n- Every tool has an affiliate link in the description.' },
+    { t: 'What actually happens in your brain when you learn', ch: 'Open Lecture Hall', views: 650e3, subs: 1.4e6, len: '48:20', th: 'Lecture 4: Memory', bg: 'linear-gradient(135deg,#355c7d,#6c5b7b)', calm: true,
+      sum: 'A university lecture on how memories form and why some of them last.\n\n- During sleep, the day’s memories move from the hippocampus into long-term storage.\n- Recalling something strengthens it more than reading it again.\n- Practice spread over several days beats one long session.' },
+    { t: 'Starfall Odyssey review: is it worth it? (no spoilers*)', ch: 'GameTalk Mike', views: 22e3, subs: 8e3, len: '21:37', th: 'HONEST REVIEW 🎮', bg: 'linear-gradient(135deg,#f7971e,#ffd200)',
+      sum: 'Mostly a retelling of the first ten hours of the story, scene by scene.\n\n- Combat: “pretty fun”. No other opinion on the mechanics.\n- Performance, length and price are not mentioned.\n\nA plot retelling, not a review. The opinion takes about 40 seconds of 21 minutes.' },
+    { t: 'Building a wooden boat, start to finish', ch: 'Slow Workshop', views: 3.4e6, subs: 2.2e6, len: '42:10', th: 'Two years in one video', bg: 'linear-gradient(135deg,#134e5e,#71b280)', calm: true,
+      sum: 'Two years of building a 4.5-metre wooden sailing boat in one video.\n\n- The hull is cedar strips over moulds, glued and covered with fibreglass.\n- The hardest part was steaming oak for the ribs. The first batch cracked.\n- Materials cost about $6,000. Next time he would buy the sails instead of sewing them.' },
+    { t: 'AI reads Reddit stories: 3 hour compilation', ch: 'Story Time Zone', views: 9e3, subs: 5e3, len: '3:02:44', th: 'AITA?? 🤯', bg: 'linear-gradient(135deg,#ee0979,#ff6a00)',
+      sum: 'Three hours of Reddit posts read by a synthetic voice over stock footage.\n\n- 41 stories, with no comment on any of them.\n- The same stories run on several other channels under different thumbnails.\n- Reading them on Reddit takes a few minutes.' },
+    { t: 'Fixing a bike chain in 4 minutes, no fluff', ch: 'Two Wheels', views: 120e3, subs: 64e3, len: '4:08', th: 'Chain fix, no fluff', bg: 'linear-gradient(135deg,#0f2027,#2c5364)', calm: true,
+      sum: 'How to fix a broken bike chain with a chain tool.\n\n- Push the pin of the damaged link out, but not all the way.\n- Shorten the chain by one link, or put in a quick link.\n- Before riding, check that the joined link bends freely.' },
+  ];
+  const FOLLOW_UP = 'This is a demo, so there is no real transcript behind it. In the extension, the model answers your question from what the video actually says.';
+  const DEFAULT_SETTINGS = {
+    enabled: true,
+    feed: {
+      lowViews: { enabled: true, maxViews: 50000 },
+      smallChannels: { enabled: true, minSubscribers: 50000 },
+      areas: { home: true },
+      action: 'dim',
+    },
+  };
+  let settings = DEFAULT_SETTINGS;
+  let openVideo = -1;
+
+  const seconds = (len) => len.split(':').reduce((total, part) => total * 60 + Number(part), 0);
+
+  function renderFeed() {
+    const fmt = new Intl.NumberFormat(lang, { notation: 'compact', maximumFractionDigits: 1 });
+    const viewsWord = strings.views || 'views';
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
+    let filtered = 0;
+    for (const [i, v] of VIDEOS.entries()) {
+      const f = settings.feed;
+      const on = settings.enabled && f.areas.home !== false;
+      const low = f.lowViews.enabled && v.views <= f.lowViews.maxViews;
+      const small = f.smallChannels.enabled && v.subs < f.smallChannels.minSubscribers;
+      const hit = on && (low || small);
+      if (hit) filtered++;
+      const el = document.createElement('article');
+      el.className = 'video' + (hit ? (f.action === 'hide' ? ' hidden' : ' dimmed') : '') + (i === openVideo ? ' open' : '');
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.innerHTML = `<div class="thumb${v.calm ? ' calm' : ''}" style="background:${v.bg}"><span></span><span class="len"></span></div><h3></h3><div class="meta"></div>`;
+      el.querySelector('.thumb span').textContent = (strings.videoThumbs || [])[i] || v.th;
+      el.querySelector('.len').textContent = v.len;
+      el.querySelector('h3').textContent = (strings.videoTitles || [])[i] || v.t;
+      el.querySelector('.meta').textContent = `${v.ch} · ${fmt.format(v.views)} ${viewsWord}`;
+      el.addEventListener('click', () => openSample(i));
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openSample(i);
+        }
+      });
+      feed.appendChild(el);
+    }
+    demoStats = { filteredCards: filtered, skippedShorts: 0 };
+    sendStats();
+  }
+
+  // Makes a sample video the popup's "open tab"; the popup then moves to its
+  // Summary tab within a second and writes the summary.
+  function openSample(i) {
+    const v = VIDEOS[i];
+    openVideo = i;
+    for (const [n, el] of document.querySelectorAll('#feed .video').entries()) el.classList.toggle('open', n === i);
+    const frame = document.getElementById('popup');
+    frame.contentWindow?.postMessage({
+      type: 'byt-demo-video',
+      video: { videoId: `sample-${i}`, title: (strings.videoTitles || [])[i] || v.t, channel: v.ch, lengthSeconds: seconds(v.len) },
+      summary: (strings.videoSummaries || [])[i] || v.sum,
+      followUp: strings.demoFollowUp || FOLLOW_UP,
+    }, '*');
+    // On narrow screens the popup sits above the feed, out of sight.
+    const box = frame.getBoundingClientRect();
+    if (box.bottom < 0 || box.top > innerHeight) frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // The popup shows these as "on this tab".
+  let demoStats = { filteredCards: 0, skippedShorts: 0 };
+  function sendStats() {
+    document.getElementById('popup').contentWindow?.postMessage({ type: 'byt-demo-stats', stats: demoStats }, '*');
+  }
+
+  window.addEventListener('message', (event) => {
+    if (event.data?.type !== 'byt-demo-settings') return;
+    settings = event.data.settings;
+    renderFeed();
+  });
+
+  // ---- Language ----
+  const pageFor = (code) => ROOT + (code === 'en' ? '' : `${code}/`) || './';
+  function remember(code) {
+    try { localStorage.setItem('lang', code); } catch {}
+  }
+  const menu = document.getElementById('lang');
+  for (const [code, { name }] of Object.entries(LANGS)) menu.add(new Option(name, code));
+  menu.value = lang;
+  menu.addEventListener('change', () => {
+    remember(menu.value);
+    location.href = pageFor(menu.value);
+  });
+  for (const a of document.querySelectorAll('footer .langs a')) a.addEventListener('click', () => remember(a.hreflang));
+
+  // The root page sends a first-time visitor on to their language, once.
+  // Search engines get every language at its own address either way.
+  if (!ROOT) {
+    let target = null;
+    try {
+      const saved = localStorage.getItem('lang');
+      if (saved) target = saved;
+    } catch {}
+    if (!target) {
+      for (const tag of navigator.languages || [navigator.language]) {
+        const code = tag.toLowerCase().split('-')[0];
+        if (LANGS[code]) {
+          target = code;
+          break;
+        }
+      }
+    }
+    if (target && target !== 'en' && LANGS[target]) location.replace(pageFor(target));
+  }
+
+  // A fresh frame, so a reloaded page never restores an old address in it.
+  (function loadPopup() {
+    const old = document.getElementById('popup');
+    const frame = old.cloneNode(false);
+    frame.src = `${ROOT}demo/index.html?lang=${lang}`;
+    frame.addEventListener('load', sendStats);
+    old.replaceWith(frame);
+  })();
+  renderFeed();
+</script>
+</body>
+</html>
