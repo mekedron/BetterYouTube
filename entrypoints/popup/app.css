@@ -17,6 +17,7 @@
   --accent: #f08c00;
   --accent-soft: rgba(240, 140, 0, 0.16);
   --accent-ink: #a35a00;
+  --danger: #b42318;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +39,7 @@
     --accent: #ffa62b;
     --accent-soft: rgba(255, 166, 43, 0.18);
     --accent-ink: #ffc46b;
+    --danger: #ff7c64;
   }
 }
 
@@ -58,4 +60,5 @@ body {
 
 body {
   width: 360px;
+  overflow-x: hidden;
 }

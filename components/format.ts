@@ -1,8 +1,11 @@
 type MessageKey = Parameters<typeof browser.i18n.getMessage>[0];
 
-export function t(key: MessageKey, n?: number): string {
-  const message = browser.i18n.getMessage(key) || key;
-  return n === undefined ? message : message.replace('{n}', formatCount(n));
+/** A translated message; `{n}` becomes `n` as a compact number, `{name}` the matching `vars` entry. */
+export function t(key: MessageKey, n?: number, vars: Record<string, string | number> = {}): string {
+  let message = browser.i18n.getMessage(key) || key;
+  if (n !== undefined) message = message.replace('{n}', formatCount(n));
+  for (const [name, value] of Object.entries(vars)) message = message.replace(`{${name}}`, String(value));
+  return message;
 }
 
 const compact = new Intl.NumberFormat(browser.i18n.getUILanguage(), {

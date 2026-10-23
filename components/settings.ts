@@ -13,6 +13,18 @@ export interface Settings {
     hideHomeShorts: boolean;
   };
   shorts: { enabled: boolean; minLikes: number; skipHiddenLikes: boolean };
+  ai: {
+    /** Whether the viewer answered the first-run question about summaries. */
+    consent: 'unasked' | 'granted' | 'declined';
+    /** The provider that writes summaries; see components/ai/providers.ts. */
+    provider: string;
+    /** 'auto' follows the browser language when the provider supports it. */
+    language: string;
+    /** The viewer's own instruction; empty means the built-in one. */
+    prompt: string;
+    /** Start the summary as soon as the popup opens on a video. */
+    autoSummarize: boolean;
+  };
   badge: boolean;
 }
 
@@ -26,6 +38,7 @@ export const DEFAULT_SETTINGS: Settings = {
     hideHomeShorts: true,
   },
   shorts: { enabled: true, minLikes: 1_000, skipHiddenLikes: true },
+  ai: { consent: 'unasked', provider: 'chrome-builtin', language: 'auto', prompt: '', autoSummarize: true },
   badge: true,
 };
 
@@ -54,6 +67,7 @@ function mergeInto<T>(defaults: T, saved: unknown): T {
 export function normalizeSettings(saved: unknown): Settings {
   const s = mergeInto(DEFAULT_SETTINGS, saved);
   if (s.feed.action !== 'dim' && s.feed.action !== 'hide') s.feed.action = 'dim';
+  if (!['unasked', 'granted', 'declined'].includes(s.ai.consent)) s.ai.consent = 'unasked';
   return s;
 }
 

@@ -102,7 +102,7 @@
     "message": "Skipped: no likes shown"
   },
   "tabFeed": {
-    "message": "Recommendations"
+    "message": "Feed"
   },
   "tabShorts": {
     "message": "Shorts"
@@ -115,5 +115,104 @@
   },
   "statShorts": {
     "message": "Shorts skipped"
+  },
+  "tabSummary": {
+    "message": "Summary"
+  },
+  "aiIntroTitle": {
+    "message": "Short summaries of videos"
+  },
+  "aiIntroText": {
+    "message": "Chrome's built-in AI reads the video's transcript and tells you what it is about, so you know before you spend twenty minutes. It runs on your computer and sends nothing anywhere."
+  },
+  "aiIntroDownload": {
+    "message": "The first time, Chrome downloads its AI model. It is a few gigabytes and happens once."
+  },
+  "aiTurnOn": {
+    "message": "Turn on"
+  },
+  "aiNotNow": {
+    "message": "Not now"
+  },
+  "aiOff": {
+    "message": "Video summaries are off."
+  },
+  "aiUnsupported": {
+    "message": "This browser has no built-in AI, so summaries are not available here yet. Support for other AI services is on the way."
+  },
+  "aiNeedsDownload": {
+    "message": "Chrome needs to download its AI model once. It is a few gigabytes."
+  },
+  "aiDownload": {
+    "message": "Download the AI model"
+  },
+  "stageDownloading": {
+    "message": "Downloading the AI model… {n}%"
+  },
+  "stageReading": {
+    "message": "Reading the transcript…"
+  },
+  "stagePart": {
+    "message": "Reading part {n} of {total}…"
+  },
+  "stageWriting": {
+    "message": "Writing…"
+  },
+  "summarize": {
+    "message": "Summarize"
+  },
+  "summarizeAgain": {
+    "message": "Summarize again"
+  },
+  "askPlaceholder": {
+    "message": "Ask about this video"
+  },
+  "ask": {
+    "message": "Ask"
+  },
+  "errNoTranscript": {
+    "message": "This video has no transcript, so there is nothing to summarize."
+  },
+  "errFailed": {
+    "message": "Could not read the transcript. Reload the YouTube page and try again."
+  },
+  "errModel": {
+    "message": "The AI could not answer. Try again."
+  },
+  "notVideo": {
+    "message": "Open a video on YouTube to see its summary here."
+  },
+  "aiSettingsTitle": {
+    "message": "Video summaries"
+  },
+  "aiSettingsHint": {
+    "message": "A short AI summary of the video in this popup"
+  },
+  "aiProvider": {
+    "message": "AI"
+  },
+  "providerChromeBuiltin": {
+    "message": "Chrome built-in AI"
+  },
+  "aiAutoTitle": {
+    "message": "Summarize when I open the popup"
+  },
+  "aiLanguageTitle": {
+    "message": "Summary language"
+  },
+  "aiLanguageAuto": {
+    "message": "Browser language"
+  },
+  "aiPromptTitle": {
+    "message": "Instruction for the AI"
+  },
+  "aiPromptHint": {
+    "message": "Sent together with the video's transcript. Leave empty to use the default."
+  },
+  "aiPromptReset": {
+    "message": "Reset"
+  },
+  "aiLanguageNote": {
+    "message": "Chrome's built-in AI writes only in these languages, so for your browser language the summary is in English."
   }
 }

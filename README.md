@@ -23,6 +23,12 @@ Website and live demo: <https://mekedron.github.io/BetterYouTube/>
 - **Shorts.** Hides Shorts shelves on Home. In the Shorts player it covers,
   mutes and pauses a Short with fewer likes than you set (1K by default), so you
   scroll past it.
+- **Video summaries.** On a video page the popup gives a short summary of the
+  video from its transcript, and answers follow-up questions about it. Chrome's
+  built-in AI (Gemini Nano) writes it on your device, with no key or account.
+  The first use downloads the model. It writes in English, Spanish, Japanese,
+  German or French. Browsers without built-in AI, such as Firefox, show a note
+  instead.
 - **Dim or hide**, per page area, with one switch to pause everything.
 - A count of filtered videos on the toolbar icon.
 - English and Russian; light and dark follow the system.
@@ -47,6 +53,20 @@ content script cannot see. So the extension runs two content scripts on
 The two talk through DOM events with JSON payloads; see
 `components/protocol.ts`. Settings live in `components/settings.ts`, one
 section per feature.
+
+Summaries:
+
+- `components/videoContext.ts` (page world) reads the title, channel, length
+  and transcript. The transcript comes from the same `get_panel` request as
+  YouTube's "Show transcript" button.
+- `components/ai/summarize.ts` builds the prompts and runs the summary and
+  follow-ups. A transcript longer than the model's context window is read in
+  parts, and the summary is written from the parts' notes.
+- `components/ai/types.ts` is the provider contract. `chromeBuiltin.ts` is the
+  only provider today; one for API keys or for local coding agents is a new
+  file registered in `components/ai/providers.ts`.
+- The popup's Summary tab (`entrypoints/popup/Summary.svelte`) runs it and
+  keeps finished conversations in `storage.session` (`components/ai/cache.ts`).
 
 ## Development
 

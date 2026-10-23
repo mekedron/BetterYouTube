@@ -1,5 +1,5 @@
-import { CONFIG_EVENT, COMMAND_EVENT, HELLO_EVENT, STATS_EVENT } from '../components/protocol';
-import type { PageCommand, PageConfig, RuntimeMessage, TabStats } from '../components/protocol';
+import { CONFIG_EVENT, COMMAND_EVENT, HELLO_EVENT, REQUEST_EVENT, RESPONSE_EVENT, STATS_EVENT } from '../components/protocol';
+import type { PageCommand, PageConfig, PageRequest, PageResponse, RuntimeMessage, TabInfo, TabStats } from '../components/protocol';
 import { loadSettings, onSettingsChanged } from '../components/settings';
 import type { Settings } from '../components/settings';
 
@@ -50,14 +50,42 @@ export default defineContentScript({
     document.addEventListener(HELLO_EVENT, onHello);
     document.addEventListener(STATS_EVENT, onStats);
 
+    // Questions to the page script, answered by RESPONSE_EVENT with the same id.
+    const pending = new Map<string, (response: PageResponse) => void>();
+    const onResponse = (event: Event) => {
+      let response: PageResponse;
+      try {
+        response = JSON.parse((event as CustomEvent<string>).detail);
+      } catch {
+        return;
+      }
+      pending.get(response.requestId)?.(response);
+      pending.delete(response.requestId);
+    };
+    document.addEventListener(RESPONSE_EVENT, onResponse);
+
+    function askPage(type: PageRequest['type']): Promise<PageResponse> {
+      const requestId = crypto.randomUUID();
+      return new Promise((resolve) => {
+        pending.set(requestId, resolve);
+        const request: PageRequest = { requestId, type };
+        document.dispatchEvent(new CustomEvent(REQUEST_EVENT, { detail: JSON.stringify(request) }));
+      });
+    }
+
     // Answers through sendResponse, which every browser version supports;
     // older Chrome ignores a promise returned from the listener.
     const onMessage = (message: RuntimeMessage, _sender: unknown, sendResponse: (response: unknown) => void) => {
       if (message?.type === 'get-tab-stats') {
-        sendResponse(stats);
+        const videoId = location.pathname === '/watch' ? new URLSearchParams(location.search).get('v') : null;
+        const info: TabInfo = { ...stats, videoId };
+        sendResponse(info);
       } else if (message?.type === 'clear-channel-cache') {
         sendCommand({ type: 'clear-channel-cache' });
         sendResponse(true);
+      } else if (message?.type === 'get-video-context') {
+        void askPage('get-video-context').then(sendResponse);
+        return true;
       }
       return undefined;
     };
@@ -67,6 +95,7 @@ export default defineContentScript({
       stopWatching();
       document.removeEventListener(HELLO_EVENT, onHello);
       document.removeEventListener(STATS_EVENT, onStats);
+      document.removeEventListener(RESPONSE_EVENT, onResponse);
       browser.runtime.onMessage.removeListener(onMessage);
     });
   },

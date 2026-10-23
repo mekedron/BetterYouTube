@@ -102,7 +102,7 @@
     "message": "Пропущено: лайки не видны"
   },
   "tabFeed": {
-    "message": "Рекомендации"
+    "message": "Лента"
   },
   "tabShorts": {
     "message": "Shorts"
@@ -115,5 +115,104 @@
   },
   "statShorts": {
     "message": "Shorts пропущено"
+  },
+  "tabSummary": {
+    "message": "Пересказ"
+  },
+  "aiIntroTitle": {
+    "message": "Краткий пересказ видео"
+  },
+  "aiIntroText": {
+    "message": "Встроенный AI в Chrome читает расшифровку видео и коротко рассказывает, о чём оно. Так вы узнаете это до того, как потратите двадцать минут. Всё работает на вашем компьютере, никуда ничего не отправляется."
+  },
+  "aiIntroDownload": {
+    "message": "В первый раз Chrome скачает свою модель AI. Это несколько гигабайт, и только один раз."
+  },
+  "aiTurnOn": {
+    "message": "Включить"
+  },
+  "aiNotNow": {
+    "message": "Не сейчас"
+  },
+  "aiOff": {
+    "message": "Пересказ видео выключен."
+  },
+  "aiUnsupported": {
+    "message": "В этом браузере нет встроенного AI, поэтому пересказ здесь пока недоступен. Поддержка других AI-сервисов на подходе."
+  },
+  "aiNeedsDownload": {
+    "message": "Chrome нужно один раз скачать модель AI. Это несколько гигабайт."
+  },
+  "aiDownload": {
+    "message": "Скачать модель AI"
+  },
+  "stageDownloading": {
+    "message": "Скачиваю модель AI… {n}%"
+  },
+  "stageReading": {
+    "message": "Читаю расшифровку…"
+  },
+  "stagePart": {
+    "message": "Читаю часть {n} из {total}…"
+  },
+  "stageWriting": {
+    "message": "Пишу…"
+  },
+  "summarize": {
+    "message": "Пересказать"
+  },
+  "summarizeAgain": {
+    "message": "Пересказать заново"
+  },
+  "askPlaceholder": {
+    "message": "Спросите о видео"
+  },
+  "ask": {
+    "message": "Спросить"
+  },
+  "errNoTranscript": {
+    "message": "У этого видео нет расшифровки, пересказывать нечего."
+  },
+  "errFailed": {
+    "message": "Не удалось прочитать расшифровку. Обновите страницу YouTube и попробуйте снова."
+  },
+  "errModel": {
+    "message": "AI не смог ответить. Попробуйте ещё раз."
+  },
+  "notVideo": {
+    "message": "Откройте видео на YouTube, и здесь появится его пересказ."
+  },
+  "aiSettingsTitle": {
+    "message": "Пересказ видео"
+  },
+  "aiSettingsHint": {
+    "message": "Короткий пересказ видео от AI в этом окне"
+  },
+  "aiProvider": {
+    "message": "AI"
+  },
+  "providerChromeBuiltin": {
+    "message": "Встроенный AI Chrome"
+  },
+  "aiAutoTitle": {
+    "message": "Пересказывать сразу при открытии"
+  },
+  "aiLanguageTitle": {
+    "message": "Язык пересказа"
+  },
+  "aiLanguageAuto": {
+    "message": "Язык браузера"
+  },
+  "aiPromptTitle": {
+    "message": "Инструкция для AI"
+  },
+  "aiPromptHint": {
+    "message": "Отправляется вместе с расшифровкой видео. Оставьте пустой, чтобы использовать стандартную."
+  },
+  "aiPromptReset": {
+    "message": "Сбросить"
+  },
+  "aiLanguageNote": {
+    "message": "Встроенный AI Chrome пишет только на этих языках, поэтому для языка вашего браузера пересказ будет на английском."
   }
 }

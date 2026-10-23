@@ -1,6 +1,7 @@
-import { CONFIG_EVENT, COMMAND_EVENT, HELLO_EVENT, STATS_EVENT } from '../components/protocol';
-import type { PageCommand, PageConfig, TabStats } from '../components/protocol';
+import { CONFIG_EVENT, COMMAND_EVENT, HELLO_EVENT, REQUEST_EVENT, RESPONSE_EVENT, STATS_EVENT } from '../components/protocol';
+import type { PageCommand, PageConfig, PageRequest, TabStats } from '../components/protocol';
 import { parseCount } from '../components/parseCount';
+import { readVideoContext } from '../components/videoContext';
 
 // Runs in YouTube's own JavaScript world: it needs `ytcfg`, the data models
 // YouTube keeps on its custom elements, and same-origin innertube requests.
@@ -542,6 +543,19 @@ function startFilter() {
       return;
     }
     if (command.type === 'clear-channel-cache') clearSubsCache();
+  });
+
+  document.addEventListener(REQUEST_EVENT, (event) => {
+    let request: PageRequest;
+    try {
+      request = JSON.parse((event as CustomEvent<string>).detail);
+    } catch {
+      return;
+    }
+    if (request.type !== 'get-video-context') return;
+    void readVideoContext(request.requestId).then((response) => {
+      document.dispatchEvent(new CustomEvent(RESPONSE_EVENT, { detail: JSON.stringify(response) }));
+    });
   });
 
   function start() {

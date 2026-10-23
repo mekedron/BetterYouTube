@@ -1,10 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { AUDIENCE_STEPS, LIKE_STEPS, t } from '../../components/format';
-  import type { RuntimeMessage, TabStats } from '../../components/protocol';
+  import { getProvider, resolveLanguage } from '../../components/ai/providers';
+  import { DEFAULT_INSTRUCTION } from '../../components/ai/summarize';
+  import type { RuntimeMessage, TabInfo } from '../../components/protocol';
   import { loadSettings, saveSettings } from '../../components/settings';
   import type { Settings } from '../../components/settings';
   import StepSlider from './StepSlider.svelte';
+  import Summary from './Summary.svelte';
   import Switch from './Switch.svelte';
 
   const WEBSITE = 'https://mekedron.github.io/BetterYouTube/';
@@ -13,42 +16,80 @@
 
   let settings = $state<Settings | null>(null);
   // null: the active tab is not a YouTube page (or not loaded yet).
-  let stats = $state<TabStats | null>(null);
-  let tabId: number | undefined;
+  let stats = $state<TabInfo | null>(null);
+  let tabId = $state<number | undefined>();
+  const videoId = $derived(stats?.videoId ?? null);
   let cacheNote = $state('');
 
-  const TABS = ['feed', 'shorts', 'general'] as const;
-  type Tab = (typeof TABS)[number];
-  const TAB_LABELS = { feed: 'tabFeed', shorts: 'tabShorts', general: 'tabGeneral' } as const;
+  const SETTINGS_TABS = ['feed', 'shorts', 'general'] as const;
+  type Tab = 'summary' | (typeof SETTINGS_TABS)[number];
+  const TAB_LABELS = { summary: 'tabSummary', feed: 'tabFeed', shorts: 'tabShorts', general: 'tabGeneral' } as const;
   const TAB_KEY = 'popup-tab';
+  // The summary tab exists only while the tab shows a video.
+  const tabs = $derived<Tab[]>(videoId ? ['summary', ...SETTINGS_TABS] : [...SETTINGS_TABS]);
 
   function savedTab(): Tab {
     try {
       const value = localStorage.getItem(TAB_KEY);
-      return TABS.includes(value as Tab) ? (value as Tab) : 'feed';
+      return SETTINGS_TABS.includes(value as (typeof SETTINGS_TABS)[number]) ? (value as Tab) : 'feed';
     } catch {
       return 'feed';
     }
   }
 
   let tab = $state<Tab>(savedTab());
+  // On a video the popup opens on its summary; elsewhere on the last settings tab.
+  let openedOnVideo = false;
+  $effect(() => {
+    if (videoId && !openedOnVideo) {
+      openedOnVideo = true;
+      tab = 'summary';
+    } else if (!videoId && tab === 'summary') {
+      tab = savedTab();
+    }
+  });
 
   function selectTab(id: Tab) {
     tab = id;
+    if (id === 'summary') return;
     try {
       localStorage.setItem(TAB_KEY, id);
     } catch {}
   }
 
-  // Every edit is saved; the content scripts pick it up from storage.
+  const aiProvider = $derived(settings ? getProvider(settings.ai.provider) : null);
+
+  function languageLabel(code: string): string {
+    try {
+      const name = new Intl.DisplayNames([browser.i18n.getUILanguage()], { type: 'language' }).of(code) ?? code;
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    } catch {
+      return code;
+    }
+  }
+
+  // Every edit is saved; the content scripts pick it up from storage. Saves
+  // wait for a short pause, because storage.sync allows only so many writes a
+  // minute and typing an instruction would exceed it.
   let lastSaved = '';
+  let saveTimer = 0;
   $effect(() => {
     if (!settings) return;
     const json = JSON.stringify(settings);
     if (json === lastSaved) return;
-    lastSaved = json;
-    void saveSettings($state.snapshot(settings) as Settings);
+    const snapshot = $state.snapshot(settings) as Settings;
+    clearTimeout(saveTimer);
+    pendingSave = () => {
+      clearTimeout(saveTimer);
+      pendingSave = null;
+      lastSaved = json;
+      void saveSettings(snapshot);
+    };
+    saveTimer = window.setTimeout(pendingSave, 400);
   });
+  // The popup closes on any click outside it; an edit made just before is
+  // written right away instead of waiting for the pause.
+  let pendingSave: (() => void) | null = null;
 
   async function refreshStats() {
     if (tabId === undefined) return;
@@ -80,7 +121,12 @@
       void refreshStats();
     });
     const poll = setInterval(refreshStats, 1000);
-    return () => clearInterval(poll);
+    const flush = () => pendingSave?.();
+    window.addEventListener('pagehide', flush);
+    return () => {
+      clearInterval(poll);
+      window.removeEventListener('pagehide', flush);
+    };
   });
 </script>
 
@@ -120,7 +166,7 @@
 
   {#if settings}
     <div class="tabs" role="tablist">
-      {#each TABS as id (id)}
+      {#each tabs as id (id)}
         <button
           type="button"
           role="tab"
@@ -132,7 +178,12 @@
       {/each}
     </div>
 
-    <div class="body" inert={!settings.enabled} role="tabpanel">
+    {#if tab === 'summary'}
+      <div role="tabpanel">
+        <Summary bind:settings {tabId} {videoId} />
+      </div>
+    {:else}
+    <div class="body" class:dimmed={!settings.enabled && tab !== 'general'} inert={!settings.enabled && tab !== 'general'} role="tabpanel">
       {#if tab === 'feed'}
         <div class="card">
           <div class="row">
@@ -223,6 +274,55 @@
         <div class="card">
           <div class="row">
             <div class="text">
+              <div class="title">{t('aiSettingsTitle')}</div>
+              <div class="hint">{t('aiSettingsHint')}</div>
+            </div>
+            <Switch
+              checked={settings.ai.consent === 'granted'}
+              label={t('aiSettingsTitle')}
+              onchange={(on: boolean) => (settings!.ai.consent = on ? 'granted' : 'declined')}
+            />
+          </div>
+          {#if settings.ai.consent === 'granted' && aiProvider}
+            <div class="extra">
+              <div class="field">
+                <span>{t('aiProvider')}</span>
+                <select bind:value={settings.ai.provider}>
+                  <option value="chrome-builtin">{t('providerChromeBuiltin')}</option>
+                </select>
+              </div>
+              <div class="field">
+                <span>{t('aiLanguageTitle')}</span>
+                <select bind:value={settings.ai.language}>
+                  <option value="auto">{t('aiLanguageAuto')}</option>
+                  {#each aiProvider.languages ?? [] as code (code)}
+                    <option value={code}>{languageLabel(code)}</option>
+                  {/each}
+                </select>
+              </div>
+              {#if settings.ai.language === 'auto' && resolveLanguage(aiProvider, 'auto', browser.i18n.getUILanguage()) !== browser.i18n.getUILanguage().toLowerCase().split('-')[0]}
+                <div class="hint">{t('aiLanguageNote')}</div>
+              {/if}
+              <label class="check">
+                <input type="checkbox" bind:checked={settings.ai.autoSummarize} />
+                <span>{t('aiAutoTitle')}</span>
+              </label>
+              <div class="prompt">
+                <div class="prompt-head">
+                  <span>{t('aiPromptTitle')}</span>
+                  {#if settings.ai.prompt}
+                    <button type="button" class="link" onclick={() => (settings!.ai.prompt = '')}>{t('aiPromptReset')}</button>
+                  {/if}
+                </div>
+                <textarea rows="3" bind:value={settings.ai.prompt} placeholder={DEFAULT_INSTRUCTION}></textarea>
+                <div class="hint">{t('aiPromptHint')}</div>
+              </div>
+            </div>
+          {/if}
+        </div>
+        <div class="card">
+          <div class="row">
+            <div class="text">
               <div class="title">{t('badgeTitle')}</div>
               <div class="hint">{t('badgeHint')}</div>
             </div>
@@ -237,6 +337,7 @@
         </div>
       {/if}
     </div>
+    {/if}
   {/if}
 
   <footer>
@@ -365,7 +466,7 @@
     min-height: 330px;
     transition: opacity 0.18s ease;
   }
-  main.paused .body {
+  .body.dimmed {
     opacity: 0.45;
   }
 
@@ -427,6 +528,62 @@
     height: 15px;
     margin: 0;
     accent-color: var(--accent);
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--body);
+    font: 400 12.5px/1.3 var(--font);
+  }
+  select {
+    max-width: 60%;
+    padding: 5px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--fg);
+    font: 500 12.5px/1.2 var(--font);
+  }
+  .prompt {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .prompt-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--body);
+    font: 400 12.5px/1.3 var(--font);
+  }
+  textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 9px;
+    background: var(--panel);
+    color: var(--fg);
+    font: 400 12.5px/1.4 var(--font);
+  }
+  textarea:focus,
+  select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+  .link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: 500 12px/1 var(--font);
+    cursor: pointer;
+  }
+  .link:hover {
+    color: var(--fg);
   }
 
   .chips {
