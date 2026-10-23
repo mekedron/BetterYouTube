@@ -5,8 +5,7 @@ import type { AiProvider, AiSession, ChatTurn, ProviderConfig } from './types';
 // provider. The prompts stay short on purpose: one instruction, the video's
 // title, channel and length, and the transcript.
 
-export const DEFAULT_INSTRUCTION =
-  'What is this video about? Answer in 3 to 5 short bullet points with its key points.';
+export const DEFAULT_INSTRUCTION = "I don't have time to watch this video. What is it about?";
 
 /** Input tokens kept free for the reply and the provider's own overhead. */
 const REPLY_RESERVE = 700;
@@ -35,7 +34,7 @@ function languageName(code: string): string {
 
 function systemPrompt(language: string): string {
   return (
-    'You summarize YouTube videos from their transcripts. Be brief and concrete. ' +
+    'You summarize YouTube videos from their transcripts. Be concrete. ' +
     'Start with the answer itself, with no introduction or closing remarks. ' +
     `Use only what the transcript says. Always answer in ${languageName(language)}.`
   );
