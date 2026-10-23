@@ -159,45 +159,52 @@ jobs:
     name: Publish to Chrome Web Store
     needs: build
     runs-on: ubuntu-latest
+    # Runs once the Web Store API credentials are set as repository secrets;
+    # until then a new version is uploaded through the dashboard by hand.
+    env:
+      CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
     steps:
+      - name: Check Web Store credentials
+        id: cws
+        run: |
+          if [ -n "$CHROME_EXTENSION_ID" ] && [ -n "$CHROME_CLIENT_ID" ] && [ -n "$CHROME_CLIENT_SECRET" ] && [ -n "$CHROME_REFRESH_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Chrome Web Store secrets are not set; skipping the submission."
+          fi
+
       - name: Checkout
+        if: steps.cws.outputs.ready == 'true'
         uses: actions/checkout@v4
 
       - name: Setup pnpm
+        if: steps.cws.outputs.ready == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
+        if: steps.cws.outputs.ready == 'true'
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
+        if: steps.cws.outputs.ready == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Download Chrome artifact
+        if: steps.cws.outputs.ready == 'true'
         uses: actions/download-artifact@v4
         with:
           name: chrome
           path: artifacts
 
-      - name: Locate zip
-        id: zip
-        run: |
-          path=$(ls artifacts/*-chrome.zip | head -n 1)
-          if [ -z "$path" ]; then
-            echo "No chrome zip found in artifacts/" >&2
-            exit 1
-          fi
-          echo "path=$path" >> "$GITHUB_OUTPUT"
-
       - name: Submit to Chrome Web Store
-        env:
-          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
-          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
-        run: pnpm wxt submit --chrome-zip "${{ steps.zip.outputs.path }}"
+        if: steps.cws.outputs.ready == 'true'
+        run: pnpm wxt submit --chrome-zip "$(ls artifacts/*-chrome.zip | head -n 1)"
 
   publish-firefox:
     name: Publish to Firefox Add-ons
