@@ -40,8 +40,11 @@ follow-up questions. Nothing else is sent, and nothing goes to the developer.
 - **A coding agent on your computer** (Claude Code, Codex or Gemini CLI) is
   reached through the BetterYouTube connector, a small program you install
   yourself. The agent then talks to its own service under your account, as it
-  does when you use it in a terminal. The connector starts the agent with its
-  tools turned off, in an empty temporary folder.
+  does when you use it in a terminal. The connector starts the agent in an
+  empty temporary folder. Claude Code and Codex get no tools. Gemini CLI has
+  no switch for that, so it runs in its read-only mode: it cannot change
+  files or run commands, but it could read files if a transcript told it to.
+  Its answer is only shown to you.
 - **A cloud API with your key** (OpenAI, Anthropic, Google Gemini, OpenRouter,
   or any OpenAI-compatible server you name) receives the request directly from
   your browser. Your key is stored only in this browser's local extension

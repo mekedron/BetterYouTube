@@ -279,7 +279,7 @@
     "message": "For example Ollama: http://127.0.0.1:11434/v1"
   },
   "agentIntro": {
-    "message": "Use Claude Code, Codex or Gemini CLI that you already have. They run on your computer with your own subscription, with all their tools turned off."
+    "message": "Use Claude Code, Codex or Gemini CLI that you already have. They run on your computer with your own subscription. Claude Code and Codex get no tools at all; Gemini CLI runs read-only."
   },
   "agentAllow": {
     "message": "Allow connection"
