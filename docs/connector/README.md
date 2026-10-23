@@ -47,6 +47,13 @@ For a development build loaded from a folder, also allow its extension id
 curl -fsSL https://mekedron.github.io/BetterYouTube/connector/install.sh | sh -s -- --extension-id <id>
 ```
 
+A Chromium browser started with `--user-data-dir` looks for the connector in
+that directory only. Name it to install there too:
+
+```sh
+curl -fsSL https://mekedron.github.io/BetterYouTube/connector/install.sh | sh -s -- --browser-dir <user data dir>
+```
+
 ## Uninstall
 
 ```sh

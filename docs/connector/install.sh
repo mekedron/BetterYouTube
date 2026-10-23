@@ -5,6 +5,7 @@
 #
 #   curl -fsSL https://mekedron.github.io/BetterYouTube/connector/install.sh | sh
 #   curl -fsSL .../install.sh | sh -s -- --extension-id <id>   also allow an unpacked build
+#   curl -fsSL .../install.sh | sh -s -- --browser-dir <dir>    also a browser started with --user-data-dir=<dir>
 #   curl -fsSL .../install.sh | sh -s -- --uninstall           remove everything it created
 #
 # BETTERYOUTUBE_CONNECTOR_URL overrides where host.mjs comes from: a base URL,
@@ -22,6 +23,7 @@ SOURCE="${BETTERYOUTUBE_CONNECTOR_URL:-https://mekedron.github.io/BetterYouTube/
 INSTALL_DIR="$HOME/.betteryoutube/connector"
 
 EXTRA_ID=""
+EXTRA_DIR=""
 UNINSTALL=0
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -30,14 +32,24 @@ while [ $# -gt 0 ]; do
       EXTRA_ID="$2"
       shift 2
       ;;
+    --browser-dir)
+      [ $# -ge 2 ] || { echo "--browser-dir needs a value" >&2; exit 1; }
+      EXTRA_DIR="$2"
+      shift 2
+      ;;
     --uninstall) UNINSTALL=1; shift ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
 done
 
 # Browser profile directories, and the NativeMessagingHosts directory inside
-# each, as "name|profile dir|kind" (kind: chromium or firefox).
+# each, as "name|profile dir|kind" (kind: chromium or firefox). A Chromium
+# browser started with --user-data-dir reads hosts from that directory only,
+# not from its usual one.
 browsers() {
+  if [ -n "$EXTRA_DIR" ]; then
+    echo "Browser data in $EXTRA_DIR|$EXTRA_DIR|chromium"
+  fi
   case "$(uname -s)" in
     Darwin)
       base="$HOME/Library/Application Support"
