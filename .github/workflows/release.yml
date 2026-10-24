@@ -159,9 +159,11 @@ jobs:
     name: Publish to Chrome Web Store
     needs: build
     runs-on: ubuntu-latest
-    # Runs once the Web Store API credentials are set as repository secrets;
-    # until then a new version is uploaded through the dashboard by hand.
+    # Runs when the Web Store API credentials are set as repository secrets.
+    # The repository variable CHROME_WEB_STORE_PUBLISH set to "off" skips it,
+    # so a tag makes only a GitHub Release.
     env:
+      PUBLISH: ${{ vars.CHROME_WEB_STORE_PUBLISH }}
       CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
       CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
       CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
@@ -170,7 +172,9 @@ jobs:
       - name: Check Web Store credentials
         id: cws
         run: |
-          if [ -n "$CHROME_EXTENSION_ID" ] && [ -n "$CHROME_CLIENT_ID" ] && [ -n "$CHROME_CLIENT_SECRET" ] && [ -n "$CHROME_REFRESH_TOKEN" ]; then
+          if [ "$PUBLISH" = "off" ]; then
+            echo "CHROME_WEB_STORE_PUBLISH is off; skipping the submission."
+          elif [ -n "$CHROME_EXTENSION_ID" ] && [ -n "$CHROME_CLIENT_ID" ] && [ -n "$CHROME_CLIENT_SECRET" ] && [ -n "$CHROME_REFRESH_TOKEN" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "Chrome Web Store secrets are not set; skipping the submission."

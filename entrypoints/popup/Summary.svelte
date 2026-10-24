@@ -5,7 +5,7 @@
   import { AGENT_NAMES, providerLabel } from '../../components/ai/labels';
   import { preparedStatus } from '../../components/ai/prepare';
   import { getProvider, providerConfig, resolveLanguage } from '../../components/ai/providers';
-  import { Conversation, DEFAULT_INSTRUCTION } from '../../components/ai/summarize';
+  import { Conversation, DEFAULT_PROMPT } from '../../components/ai/summarize';
   import type { Stage } from '../../components/ai/summarize';
   import { ProviderError } from '../../components/ai/types';
   import type { ChatTurn, ProviderStatus } from '../../components/ai/types';
@@ -30,7 +30,7 @@
 
   const provider = $derived(getProvider(settings.ai.provider));
   const language = $derived(resolveLanguage(provider, settings.ai.language, browser.i18n.getUILanguage()));
-  const instruction = $derived(settings.ai.prompt.trim() || DEFAULT_INSTRUCTION);
+  const instruction = $derived(settings.ai.prompt.trim() || DEFAULT_PROMPT);
   const config = $derived(providerConfig(settings, keys, provider.id));
   const print = $derived(fingerprint(provider.id, config, language, instruction));
   // Agents the connector already found, to mention them on the first-run card.

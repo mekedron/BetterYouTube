@@ -4,7 +4,7 @@
   import { providerLabel } from '../../components/ai/labels';
   import { COMMON_LANGUAGES, getProvider, PROVIDERS, resolveLanguage } from '../../components/ai/providers';
   import { loadApiKeys } from '../../components/ai/secrets';
-  import { DEFAULT_INSTRUCTION } from '../../components/ai/summarize';
+  import { DEFAULT_PROMPT } from '../../components/ai/summarize';
   import type { RuntimeMessage, TabInfo } from '../../components/protocol';
   import { loadSettings, saveSettings } from '../../components/settings';
   import type { Settings } from '../../components/settings';
@@ -334,9 +334,11 @@
                   <span>{t('aiPromptTitle')}</span>
                   {#if settings.ai.prompt}
                     <button type="button" class="link" onclick={() => (settings!.ai.prompt = '')}>{t('aiPromptReset')}</button>
+                  {:else}
+                    <button type="button" class="link" onclick={() => (settings!.ai.prompt = DEFAULT_PROMPT)}>{t('aiPromptEdit')}</button>
                   {/if}
                 </div>
-                <textarea rows="3" bind:value={settings.ai.prompt} placeholder={DEFAULT_INSTRUCTION}></textarea>
+                <textarea rows="8" bind:value={settings.ai.prompt} placeholder={DEFAULT_PROMPT}></textarea>
                 <div class="hint">{t('aiPromptHint')}</div>
               </div>
             </div>

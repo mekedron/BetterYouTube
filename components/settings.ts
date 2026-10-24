@@ -20,7 +20,7 @@ export interface Settings {
     provider: string;
     /** 'auto' follows the browser language when the provider supports it. */
     language: string;
-    /** The viewer's own instruction; empty means the built-in one. */
+    /** The viewer's own prompt, used instead of the built-in one; empty means the built-in one. */
     prompt: string;
     /** Start the summary as soon as the popup opens on a video. */
     autoSummarize: boolean;

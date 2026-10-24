@@ -2,15 +2,18 @@ import type { VideoContext } from '../protocol';
 import type { AiProvider, AiSession, ChatTurn, ProviderConfig } from './types';
 
 // Builds the prompts and runs a summary or a follow-up question through any
-// provider. The prompts stay short on purpose: the viewer's instruction, a
-// fixed layout for the answer, the video's title, channel and length, and the
-// transcript.
+// provider. A summary prompt is the viewer's prompt, or the built-in one when
+// theirs is empty, followed by the video's title, channel, length and
+// transcript. The viewer's prompt replaces the built-in one whole, layout
+// included; only the answer language comes from its own setting.
 
-export const DEFAULT_INSTRUCTION = "I don't have time to watch this video. What is it about?";
+// The layout keeps small on-device models from drifting into long prose.
+// Time ranges are left out: Chrome's model gets them wrong.
+export const DEFAULT_PROMPT = `I don't have time to watch this video. What is it about?
 
-// The layout of a summary. Small on-device models drift into long prose
-// without it. Time ranges are left out: Chrome's model gets them wrong.
-const SUMMARY_LAYOUT = `Use exactly this layout, and keep every line under 20 words. Write the headings in the language of the answer.
+Be concrete and very brief. Start with the answer itself, with no introduction or closing remarks. Use only what the transcript says.
+
+Use exactly this layout, and keep every line under 20 words. Write the headings in the language of the answer.
 
 **In short:** what the video really is, and whether it has substance or is mostly filler.
 
@@ -49,11 +52,7 @@ function languageName(code: string): string {
 }
 
 export function systemPrompt(language: string): string {
-  return (
-    'You summarize YouTube videos from their transcripts. Be concrete and very brief. ' +
-    'Start with the answer itself, with no introduction or closing remarks. ' +
-    `Use only what the transcript says. Always answer in ${languageName(language)}.`
-  );
+  return `You answer questions about a YouTube video from its transcript. Always answer in ${languageName(language)}.`;
 }
 
 function duration(seconds: number): string {
@@ -123,10 +122,10 @@ export class Conversation {
     const session = await openSession(this.options, []);
     this.session = session;
 
-    let prompt = `${instruction}\n\n${SUMMARY_LAYOUT}\n\n${videoBlock(video, 'Transcript', video.transcript)}`;
+    let prompt = `${instruction}\n\n${videoBlock(video, 'Transcript', video.transcript)}`;
     const whole = await session.measure(prompt);
     if (whole.tokens > whole.room - REPLY_RESERVE) {
-      prompt = `${instruction}\n\n${SUMMARY_LAYOUT}\n\n${videoBlock(video, 'Notes on the transcript, part by part', await this.notes(video, session, whole))}`;
+      prompt = `${instruction}\n\n${videoBlock(video, 'Notes on the transcript, part by part', await this.notes(video, session, whole))}`;
     }
 
     onStage({ kind: 'writing' });

@@ -204,10 +204,13 @@
     "message": "Browser language"
   },
   "aiPromptTitle": {
-    "message": "Instruction for the AI"
+    "message": "Prompt for the AI"
   },
   "aiPromptHint": {
-    "message": "Sent together with the video's transcript. Leave empty to use the default."
+    "message": "Replaces the built-in prompt entirely. The video's title, channel, length and transcript are added after it. Leave empty to use the built-in one."
+  },
+  "aiPromptEdit": {
+    "message": "Edit the built-in one"
   },
   "aiPromptReset": {
     "message": "Reset"

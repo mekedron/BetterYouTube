@@ -32,7 +32,7 @@ your browser. The extension has no server, no analytics and no ads.
 ## AI summaries
 
 You choose who writes a summary. Whichever you choose gets the video's
-transcript, title, channel name and length, your instruction, and your
+transcript, title, channel name and length, your prompt, and your
 follow-up questions. Nothing else is sent, and nothing goes to the developer.
 
 - **Chrome's built-in AI** (the default) runs on your device. Chrome downloads

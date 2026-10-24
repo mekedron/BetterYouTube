@@ -3,7 +3,7 @@ import { chromeBuiltin } from '../components/ai/chromeBuiltin';
 import { PREPARE_DELAY_MS } from '../components/ai/prepare';
 import type { PrepareMessage } from '../components/ai/prepare';
 import { providerConfig, resolveLanguage } from '../components/ai/providers';
-import { DEFAULT_INSTRUCTION } from '../components/ai/summarize';
+import { DEFAULT_PROMPT } from '../components/ai/summarize';
 import type { PageResponse, RuntimeMessage, TabInfo } from '../components/protocol';
 import { loadSettings, onSettingsChanged } from '../components/settings';
 
@@ -90,7 +90,7 @@ export default defineBackground(() => {
       return;
     }
 
-    const instruction = ai.prompt.trim() || DEFAULT_INSTRUCTION;
+    const instruction = ai.prompt.trim() || DEFAULT_PROMPT;
     const print = fingerprint(chromeBuiltin.id, providerConfig(settings, {}, chromeBuiltin.id), language, instruction);
     if (startedByPopup.has(videoId) || (await loadConversation(videoId, print))) return;
     const context = (await browser.tabs.sendMessage(tabId, { type: 'get-video-context' } satisfies RuntimeMessage)) as
