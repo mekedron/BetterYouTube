@@ -50,7 +50,7 @@ export function factsOf(card: YtElement): Omit<VideoFacts, 'subscribers'> | null
     const badges: any[] = (lockup.contentImage?.thumbnailViewModel?.overlays ?? []).flatMap(
       (o: any) => o.thumbnailBottomOverlayViewModel?.badges ?? [],
     );
-    const length = badges.map((b) => b.thumbnailBadgeViewModel?.text ?? '').find((t: string) => /^\d+(:\d\d)+$/.test(t)) ?? '';
+    const length = badges.map((b) => b.thumbnailBadgeViewModel?.text ?? '').find((label: string) => /^\d+(:\d\d)+$/.test(label)) ?? '';
     return { id: lockup.contentId, title: text(meta?.title), details: details.filter(Boolean), length };
   }
   // The older ytd-*-video-renderer layout, still served in search and some experiments.
