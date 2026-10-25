@@ -5,6 +5,9 @@ agents you already have on your computer: Claude Code, Codex or Gemini CLI. A
 browser extension cannot start programs by itself, so this small helper does it
 for the extension, through the browser's native messaging.
 
+Get the extension itself from the
+[Chrome Web Store](https://chromewebstore.google.com/detail/dbbghiihkgjghkgbhflpnhajdbfpgnag).
+
 ## What it does and does not do
 
 - It answers only the BetterYouTube extension. The browser enforces this: the

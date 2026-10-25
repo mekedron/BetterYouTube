@@ -245,7 +245,7 @@
       <h1 data-i18n="h1">Дело не в вашем <span class="strike">внимании</span>. Дело в <em>воде</em>.</h1>
       <p class="lede" data-i18n="lede">BetterYouTube приглушает видео, сделанные, чтобы потратить ваше время: воду с кричащим превью, крошечные контент-фермы, AI-мусор и Shorts, которые никому не понравились. Видео, которые стоят вашего вечера, снова заметны.</p>
       <div class="cta">
-        <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest">
+        <a class="btn primary" href="https://chromewebstore.google.com/detail/dbbghiihkgjghkgbhflpnhajdbfpgnag">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 8h9M8.5 14 4 6.3M15.5 14 11 21.8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
           <span data-i18n="ctaChrome">Установить в Chrome</span>
         </a>
@@ -398,12 +398,12 @@
       <div class="grid">
         <div class="item"><b data-i18n="p1Title">Без серверов</b><span data-i18n="p1Text">У расширения нет своего сервера. Встроенный AI Chrome и ваши агенты работают на вашем компьютере. Облачный AI, если вы его выберете, получает расшифровку с вашим ключом, и больше никто.</span></div>
         <div class="item"><b data-i18n="p2Title">Без слежки</b><span data-i18n="p2Text">Без аналитики, аккаунтов и рекламы. Настройки синхронизируются через ваш собственный профиль браузера.</span></div>
-        <div class="item"><b data-i18n="p3Title">Только один сайт</b><span data-i18n="p3Text">Работает на youtube.com и больше нигде, с единственным разрешением «storage» для настроек.</span></div>
+        <div class="item"><b data-i18n="p3Title">Только один сайт</b><span data-i18n="p3Text">Работает на youtube.com и больше нигде. Не просит доступа к другим сайтам, вкладкам и истории.</span></div>
       </div>
       <div class="install">
         <h2 data-i18n="installTitle">Отдавайте своё время тем, кто его уважает</h2>
         <div class="cta">
-          <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest"><span data-i18n="ctaChrome">Установить в Chrome</span></a>
+          <a class="btn primary" href="https://chromewebstore.google.com/detail/dbbghiihkgjghkgbhflpnhajdbfpgnag"><span data-i18n="ctaChrome">Установить в Chrome</span></a>
           <a class="btn" href="https://github.com/mekedron/BetterYouTube"><span data-i18n="ctaSource">Код на GitHub</span></a>
           <a class="btn" href="https://buymeacoffee.com/mekedron"><span data-i18n="ctaCoffee">Купить мне кофе</span></a>
         </div>
@@ -424,11 +424,6 @@
 
 <script src="../i18n.js"></script>
 <script>
-  // The Chrome Web Store link, once the listing is live. Until then the
-  // buttons point to the latest GitHub release.
-  const CHROME_STORE_URL = '';
-  if (CHROME_STORE_URL) for (const a of document.querySelectorAll('[data-store="chrome"]')) a.href = CHROME_STORE_URL;
-
   // Every language has its own page, written by scripts/build-landing.mjs:
   // English at the root, the others in /<code>/. data-root leads back to the
   // root from a language page.

@@ -12,6 +12,15 @@ slop and Shorts nobody liked. The videos worth your time stand out again.
 
 Website and live demo: <https://mekedron.github.io/BetterYouTube/>
 
+## Install
+
+- **Chrome, Edge, Brave and other Chromium browsers:**
+  [BetterYouTube on the Chrome Web Store](https://chromewebstore.google.com/detail/dbbghiihkgjghkgbhflpnhajdbfpgnag).
+- **Firefox:** not on Firefox Add-ons yet. Download the Firefox zip from the
+  [latest release](https://github.com/mekedron/BetterYouTube/releases/latest),
+  open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on**
+  and pick the zip. Firefox removes it when it restarts.
+
 ## What it does
 
 - **Few views.** Dims videos at or below a view count you choose (50K by
@@ -111,7 +120,8 @@ pnpm demo             # build, then copy the popup into docs/demo/ for the site
 Pushing a tag `vX.Y.Z` runs `.github/workflows/release.yml`. It builds the
 Chrome and Firefox zips, attaches them to a GitHub Release, submits the Chrome
 zip to the Chrome Web Store, and submits to Firefox Add-ons once its secrets are
-set. The site in `docs/` deploys to GitHub Pages from `main` with
+set. The repository variable `CHROME_WEB_STORE_PUBLISH` set to `off` skips the
+Chrome Web Store, so a tag makes only a GitHub Release. The site in `docs/` deploys to GitHub Pages from `main` with
 `.github/workflows/pages.yml`.
 
 ## Privacy

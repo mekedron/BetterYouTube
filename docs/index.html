@@ -245,7 +245,7 @@
       <h1 data-i18n="h1">It's not your <span class="strike">attention span</span>. It's the <em>padding</em>.</h1>
       <p class="lede" data-i18n="lede">BetterYouTube dims the videos built to waste your time: filler with a loud thumbnail, tiny content farms, AI slop and Shorts nobody liked. The videos worth your evening stand out again.</p>
       <div class="cta">
-        <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest">
+        <a class="btn primary" href="https://chromewebstore.google.com/detail/dbbghiihkgjghkgbhflpnhajdbfpgnag">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 8h9M8.5 14 4 6.3M15.5 14 11 21.8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
           <span data-i18n="ctaChrome">Add to Chrome</span>
         </a>
@@ -398,12 +398,12 @@
       <div class="grid">
         <div class="item"><b data-i18n="p1Title">No servers</b><span data-i18n="p1Text">The extension has no backend. Chrome's built-in AI and your coding agents run on your computer. A cloud AI you pick gets the transcript with your own key, and nobody else does.</span></div>
         <div class="item"><b data-i18n="p2Title">No tracking</b><span data-i18n="p2Text">No analytics, no accounts, no ads. Your settings sync through your own browser profile.</span></div>
-        <div class="item"><b data-i18n="p3Title">One site only</b><span data-i18n="p3Text">It runs on youtube.com and nowhere else, with a single “storage” permission for your settings.</span></div>
+        <div class="item"><b data-i18n="p3Title">One site only</b><span data-i18n="p3Text">It runs on youtube.com and nowhere else. It asks for no access to your other sites, tabs or history.</span></div>
       </div>
       <div class="install">
         <h2 data-i18n="installTitle">Give your time to people who respect it</h2>
         <div class="cta">
-          <a class="btn primary" data-store="chrome" href="https://github.com/mekedron/BetterYouTube/releases/latest"><span data-i18n="ctaChrome">Add to Chrome</span></a>
+          <a class="btn primary" href="https://chromewebstore.google.com/detail/dbbghiihkgjghkgbhflpnhajdbfpgnag"><span data-i18n="ctaChrome">Add to Chrome</span></a>
           <a class="btn" href="https://github.com/mekedron/BetterYouTube"><span data-i18n="ctaSource">Source on GitHub</span></a>
           <a class="btn" href="https://buymeacoffee.com/mekedron"><span data-i18n="ctaCoffee">Buy me a coffee</span></a>
         </div>
@@ -424,11 +424,6 @@
 
 <script src="i18n.js"></script>
 <script>
-  // The Chrome Web Store link, once the listing is live. Until then the
-  // buttons point to the latest GitHub release.
-  const CHROME_STORE_URL = '';
-  if (CHROME_STORE_URL) for (const a of document.querySelectorAll('[data-store="chrome"]')) a.href = CHROME_STORE_URL;
-
   // Every language has its own page, written by scripts/build-landing.mjs:
   // English at the root, the others in /<code>/. data-root leads back to the
   // root from a language page.
