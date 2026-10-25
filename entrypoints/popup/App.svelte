@@ -223,11 +223,13 @@
                 steps={AUDIENCE_STEPS}
                 label={t('smallChannelsTitle')}
               />
-              <label class="check">
-                <input type="checkbox" bind:checked={settings.feed.smallChannels.exemptSubscriptions} />
-                <span>{t('exemptSubscriptions')}</span>
-              </label>
             </div>
+          {/if}
+          {#if settings.feed.lowViews.enabled || settings.feed.smallChannels.enabled}
+            <label class="check exempt">
+              <input type="checkbox" bind:checked={settings.feed.exemptSubscriptions} />
+              <span>{t('exemptSubscriptions')}</span>
+            </label>
           {/if}
         </div>
 
@@ -546,6 +548,10 @@
     color: var(--body);
     font: 400 12.5px/1.3 var(--font);
     cursor: pointer;
+  }
+  .exempt {
+    padding: 12px;
+    border-top: 1px solid var(--border);
   }
   .check input {
     width: 15px;

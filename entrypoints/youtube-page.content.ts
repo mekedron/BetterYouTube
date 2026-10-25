@@ -260,14 +260,11 @@ function startFilter() {
   }
 
   // true when the card's channel is known to be below the subscriber minimum.
-  // Until the subscription list and the channel's count have loaded, the card
-  // stays as it is.
+  // Until the channel's count has loaded, the card stays as it is.
   function isSmallChannel(card: YtElement): boolean {
     const rule = config!.settings.feed.smallChannels;
-    if (rule.exemptSubscriptions && !mySubscriptions) return false;
     const channelId = channelIdOf(card);
     if (!channelId) return false;
-    if (rule.exemptSubscriptions && mySubscriptions!.has(channelId)) return false;
     const cached = subsCache.get(channelId);
     if (!cached) {
       requestSubs(channelId);
@@ -291,13 +288,20 @@ function startFilter() {
 
     // Innertube requests need the client context from the page's config.
     const canAsk = Boolean(ytcfg()?.INNERTUBE_CONTEXT);
-    if (canAsk && feed.smallChannels.enabled && feed.smallChannels.exemptSubscriptions && !subscriptionsRequested) {
+    const exempting = feed.exemptSubscriptions && canAsk && (feed.lowViews.enabled || feed.smallChannels.enabled);
+    if (exempting && !subscriptionsRequested) {
       subscriptionsRequested = true;
       void loadMySubscriptions();
     }
     let filtered = 0;
     for (const card of matched) {
       let filter = false;
+      // Until the subscription list has loaded, no card is filtered: a
+      // subscribed channel's video must not flash dimmed.
+      if (exempting && (!mySubscriptions || mySubscriptions.has(channelIdOf(card as YtElement) ?? ''))) {
+        card.classList.remove(FILTERED_CLASS);
+        continue;
+      }
       if (feed.lowViews.enabled) {
         const views = viewsOf(card);
         filter = views !== null && views <= feed.lowViews.maxViews;

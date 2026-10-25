@@ -27,8 +27,9 @@ Website and live demo: <https://mekedron.github.io/BetterYouTube/>
   default) on Home, in the "Up next" column and, if you turn it on, in search.
 - **Small channels.** Dims videos from channels under a subscriber count you
   choose (50K by default). Cards don't show that number, so the extension asks
-  YouTube once per channel and keeps the answer for a week. Channels you
-  subscribe to are never dimmed.
+  YouTube once per channel and keeps the answer for a week.
+- **Your subscriptions.** Videos from channels you subscribe to are never
+  dimmed by either filter above. A checkbox turns this off.
 - **Shorts.** Hides Shorts shelves on Home. In the Shorts player it covers,
   mutes and pauses a Short with fewer likes than you set (1K by default), so you
   scroll past it.

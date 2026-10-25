@@ -7,7 +7,9 @@ export interface Settings {
   enabled: boolean;
   feed: {
     lowViews: { enabled: boolean; maxViews: number };
-    smallChannels: { enabled: boolean; minSubscribers: number; exemptSubscriptions: boolean };
+    smallChannels: { enabled: boolean; minSubscribers: number };
+    /** Videos from channels the viewer subscribes to pass both filters above. */
+    exemptSubscriptions: boolean;
     areas: { home: boolean; watch: boolean; search: boolean };
     action: 'dim' | 'hide';
     hideHomeShorts: boolean;
@@ -50,7 +52,8 @@ export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   feed: {
     lowViews: { enabled: true, maxViews: 50_000 },
-    smallChannels: { enabled: true, minSubscribers: 50_000, exemptSubscriptions: true },
+    smallChannels: { enabled: true, minSubscribers: 50_000 },
+    exemptSubscriptions: true,
     areas: { home: true, watch: true, search: false },
     action: 'dim',
     hideHomeShorts: true,
@@ -101,6 +104,9 @@ function mergeInto<T>(defaults: T, saved: unknown): T {
 
 export function normalizeSettings(saved: unknown): Settings {
   const s = mergeInto(DEFAULT_SETTINGS, saved);
+  // Settings saved by version 0.3.1 and earlier keep this choice under smallChannels.
+  const legacy = (saved as any)?.feed?.smallChannels?.exemptSubscriptions;
+  if (typeof legacy === 'boolean' && typeof (saved as any)?.feed?.exemptSubscriptions !== 'boolean') s.feed.exemptSubscriptions = legacy;
   if (s.feed.action !== 'dim' && s.feed.action !== 'hide') s.feed.action = 'dim';
   if (!['unasked', 'granted', 'declined'].includes(s.ai.consent)) s.ai.consent = 'unasked';
   if (!['off', 'model', 'summary'].includes(s.ai.prepare)) s.ai.prepare = 'off';
