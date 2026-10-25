@@ -30,8 +30,10 @@ Website and live demo: <https://mekedron.github.io/BetterYouTube/>
   YouTube once per channel and keeps the answer for a week.
 - **Your subscriptions.** Videos from channels you subscribe to are never
   dimmed by either filter above. A checkbox turns this off.
-- **AI mode for the feed.** Instead of the two rules, a decision model judges
-  each video against your own description of what is worth your time:
+- **AI mode for the feed.** Instead of the two rules, or after them, a
+  decision model judges each video against your own description of what is
+  worth your time. "Both" applies the free rules first and sends the AI only
+  the videos they let through. The services are
   [OpenAI Decisions](https://developers.openai.com/api/docs/guides/decisions)
   or [TypeSafe Jev](https://docs.typesafe.ai/introduction), with your API key.
   One request covers a batch of up to 30 cards. "The card" sends what the card

@@ -430,5 +430,11 @@
   },
   "ollamaOrigins": {
     "message": "Ollama answers browser extensions only when OLLAMA_ORIGINS allows them. On a Mac, run this in Terminal, then quit and reopen Ollama. On Linux, set the same variable for the ollama service."
+  },
+  "feedModeBoth": {
+    "message": "Both"
+  },
+  "feedModeBothHint": {
+    "message": "The rules first, for free. The AI judges only the videos they let through, with your API key."
   }
 }

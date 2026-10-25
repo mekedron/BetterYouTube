@@ -147,7 +147,7 @@
     {/if}
   </header>
 
-  {#if settings?.enabled && settings.feed.mode === 'ai' && stats?.aiError}
+  {#if settings?.enabled && settings.feed.mode !== 'rules' && stats?.aiError}
     <div class="ai-error">
       {stats.aiError === 'no-key' ? t('statusAiNoKey') : t('statusAiError', undefined, { error: stats.aiError })}
     </div>
@@ -204,20 +204,19 @@
             <div class="segmented" role="radiogroup" aria-label={t('feedModeTitle')}>
               <label><input type="radio" bind:group={settings.feed.mode} value="rules" />{t('feedModeRules')}</label>
               <label><input type="radio" bind:group={settings.feed.mode} value="ai" />{t('feedModeAi')}</label>
+              <label><input type="radio" bind:group={settings.feed.mode} value="both" />{t('feedModeBoth')}</label>
             </div>
-            <div class="hint">{settings.feed.mode === 'rules' ? t('feedModeRulesHint') : t('feedModeAiHint')}</div>
+            <div class="hint">
+              {settings.feed.mode === 'rules'
+                ? t('feedModeRulesHint')
+                : settings.feed.mode === 'ai'
+                  ? t('feedModeAiHint')
+                  : t('feedModeBothHint')}
+            </div>
           </div>
         </div>
 
-        {#if settings.feed.mode === 'ai'}
-          <div class="card">
-            <FeedAiSettings bind:settings bind:keys />
-            <label class="check exempt">
-              <input type="checkbox" bind:checked={settings.feed.exemptSubscriptions} />
-              <span>{t('exemptSubscriptions')}</span>
-            </label>
-          </div>
-        {:else}
+        {#if settings.feed.mode !== 'ai'}
         <div class="card">
           <div class="row">
             <div class="text">
@@ -252,13 +251,23 @@
               />
             </div>
           {/if}
-          {#if settings.feed.lowViews.enabled || settings.feed.smallChannels.enabled}
+          {#if settings.feed.mode === 'rules' && (settings.feed.lowViews.enabled || settings.feed.smallChannels.enabled)}
             <label class="check exempt">
               <input type="checkbox" bind:checked={settings.feed.exemptSubscriptions} />
               <span>{t('exemptSubscriptions')}</span>
             </label>
           {/if}
         </div>
+        {/if}
+
+        {#if settings.feed.mode !== 'rules'}
+          <div class="card">
+            <FeedAiSettings bind:settings bind:keys />
+            <label class="check exempt">
+              <input type="checkbox" bind:checked={settings.feed.exemptSubscriptions} />
+              <span>{t('exemptSubscriptions')}</span>
+            </label>
+          </div>
         {/if}
 
         <div class="card">

@@ -57,8 +57,9 @@ You can turn summaries off in the popup's General tab.
 
 ## AI mode for the feed
 
-It is off unless you choose "AI" on the Feed tab. Then the extension sends the
-videos in your recommendations to the decision service you pick, OpenAI
+It is off unless you choose "AI" or "Both" on the Feed tab. Then the extension
+sends the videos in your recommendations (with "Both", only those the view and
+channel-size rules let through) to the decision service you pick, OpenAI
 Decisions or TypeSafe Jev, with your own API key: each video's title, what its
 card shows (channel, views, age, length), the channel's subscriber count when
 the extension already knows it, and your description of what is worth your

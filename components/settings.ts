@@ -10,10 +10,11 @@ export interface Settings {
   enabled: boolean;
   feed: {
     /**
-     * How videos are judged: by the view and channel-size rules, or by a
-     * decision model against the viewer's own criteria (components/feedAi.ts).
+     * How videos are judged: by the view and channel-size rules, by a
+     * decision model against the viewer's own criteria (components/feedAi.ts),
+     * or by both, the rules first.
      */
-    mode: 'rules' | 'ai';
+    mode: 'rules' | 'ai' | 'both';
     lowViews: { enabled: boolean; maxViews: number };
     smallChannels: { enabled: boolean; minSubscribers: number };
     /** Videos from channels the viewer subscribes to pass every filter, in both modes. */
@@ -126,7 +127,7 @@ export function normalizeSettings(saved: unknown): Settings {
   const legacy = (saved as any)?.feed?.smallChannels?.exemptSubscriptions;
   if (typeof legacy === 'boolean' && typeof (saved as any)?.feed?.exemptSubscriptions !== 'boolean') s.feed.exemptSubscriptions = legacy;
   if (s.feed.action !== 'dim' && s.feed.action !== 'hide') s.feed.action = 'dim';
-  if (s.feed.mode !== 'rules' && s.feed.mode !== 'ai') s.feed.mode = 'rules';
+  if (!['rules', 'ai', 'both'].includes(s.feed.mode)) s.feed.mode = 'rules';
   if (s.feed.ai.service !== 'openai' && s.feed.ai.service !== 'jev') s.feed.ai.service = 'openai';
   if (s.feed.ai.depth !== 'card' && s.feed.ai.depth !== 'full') s.feed.ai.depth = 'card';
   if (!(s.feed.ai.strictness in STRICTNESS_THRESHOLD)) s.feed.ai.strictness = 'balanced';

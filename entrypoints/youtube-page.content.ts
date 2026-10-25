@@ -285,16 +285,16 @@ function startFilter() {
     changed: schedule,
   });
 
-  // true when the card's channel is known to be below the subscriber minimum.
-  // Until the channel's count has loaded, the card stays as it is.
-  function isSmallChannel(card: YtElement): boolean {
+  // Whether the card's channel is below the subscriber minimum; null while
+  // its count loads. A card with no channel, or a hidden count, passes.
+  function isSmallChannel(card: YtElement): boolean | null {
     const rule = config!.settings.feed.smallChannels;
     const channelId = channelIdOf(card);
     if (!channelId) return false;
     const cached = subsCache.get(channelId);
     if (!cached) {
       requestSubs(channelId);
-      return false;
+      return null;
     }
     return cached[0] !== null && cached[0] < rule.minSubscribers;
   }
@@ -314,9 +314,13 @@ function startFilter() {
 
     // Innertube requests need the client context from the page's config.
     const canAsk = Boolean(ytcfg()?.INNERTUBE_CONTEXT);
-    const ai = feed.mode === 'ai';
+    // 'both' applies the free rules first, and asks the AI only about the
+    // videos they let through.
+    const rules = feed.mode !== 'ai';
+    const ai = feed.mode !== 'rules';
     if (ai) aiJudge.configure(feed.ai);
-    const exempting = feed.exemptSubscriptions && canAsk && (ai || feed.lowViews.enabled || feed.smallChannels.enabled);
+    const exempting =
+      feed.exemptSubscriptions && canAsk && (ai || feed.lowViews.enabled || feed.smallChannels.enabled);
     if (exempting && !subscriptionsRequested) {
       subscriptionsRequested = true;
       void loadMySubscriptions();
@@ -330,13 +334,18 @@ function startFilter() {
         card.classList.remove(FILTERED_CLASS);
         continue;
       }
-      if (ai) {
-        filter = aiJudge.filter(card as YtElement) ?? false;
-      } else if (feed.lowViews.enabled) {
+      // A card the rules have not decided on yet is not sent to the AI.
+      let undecided = false;
+      if (rules && feed.lowViews.enabled) {
         const views = viewsOf(card);
         filter = views !== null && views <= feed.lowViews.maxViews;
       }
-      if (!ai && !filter && feed.smallChannels.enabled && canAsk) filter = isSmallChannel(card as YtElement);
+      if (rules && !filter && feed.smallChannels.enabled && canAsk) {
+        const small = isSmallChannel(card as YtElement);
+        filter = small === true;
+        undecided = small === null;
+      }
+      if (ai && !filter && !undecided) filter = aiJudge.filter(card as YtElement) ?? false;
       card.classList.toggle(FILTERED_CLASS, filter);
       // YouTube keeps earlier pages in the DOM, hidden; the count covers
       // only the page on screen.
@@ -525,7 +534,7 @@ function startFilter() {
       const stats: TabStats = {
         filteredCards,
         skippedShorts: skippedShortIds.size,
-        aiError: config?.settings.feed.mode === 'ai' ? aiJudge.error : null,
+        aiError: config && config.settings.feed.mode !== 'rules' ? aiJudge.error : null,
       };
       const json = JSON.stringify(stats);
       if (json === lastSentStats) return;
