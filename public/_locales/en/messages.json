@@ -361,5 +361,71 @@
   },
   "aiPrepareSummaryHint": {
     "message": "After a video stays open for 3 seconds, the model writes its summary, and the popup opens with it ready. The model then works on every video you stay on, even when you don't need a summary."
+  },
+  "feedModeTitle": {
+    "message": "How videos are judged"
+  },
+  "feedModeRules": {
+    "message": "Rules"
+  },
+  "feedModeAi": {
+    "message": "AI"
+  },
+  "feedModeRulesHint": {
+    "message": "By views and channel size. Free, and nothing leaves your browser."
+  },
+  "feedModeAiHint": {
+    "message": "An AI decision model reads each video's card and judges it against what you call worth your time. Uses your API key."
+  },
+  "feedAiService": {
+    "message": "Service"
+  },
+  "feedAiKeyHint": {
+    "message": "Stored only in this browser. The titles and details of the videos in your feed go to {name}, nothing else."
+  },
+  "feedAiAllow": {
+    "message": "Allow access to api.typesafe.ai"
+  },
+  "feedAiAllowHint": {
+    "message": "Jev's API accepts requests from an extension only with this permission."
+  },
+  "feedAiDepth": {
+    "message": "What the AI sees"
+  },
+  "feedAiDepthCard": {
+    "message": "The card"
+  },
+  "feedAiDepthFull": {
+    "message": "Card and video page"
+  },
+  "feedAiDepthCardHint": {
+    "message": "Fast. Title, channel, views, age and length, as the card shows them."
+  },
+  "feedAiDepthFullHint": {
+    "message": "Slower. Also each video's description, tags, category and date, read from YouTube first. Likes are left out: YouTube gives them only with the whole video page."
+  },
+  "feedAiCriteria": {
+    "message": "Worth your time"
+  },
+  "feedAiCriteriaHint": {
+    "message": "The AI compares every video in your feed with this description."
+  },
+  "feedAiStrictness": {
+    "message": "Strictness"
+  },
+  "feedAiLenient": {
+    "message": "Lenient"
+  },
+  "feedAiBalanced": {
+    "message": "Balanced"
+  },
+  "feedAiStrict": {
+    "message": "Strict"
+  },
+  "statusAiNoKey": {
+    "message": "The AI mode needs an API key. Add it on the Feed tab."
+  },
+  "statusAiError": {
+    "message": "The AI mode stopped: {error}. Change a setting or reload YouTube to try again."
   }
 }

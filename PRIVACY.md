@@ -55,6 +55,19 @@ follow-up questions. Nothing else is sent, and nothing goes to the developer.
 
 You can turn summaries off in the popup's General tab.
 
+## AI mode for the feed
+
+It is off unless you choose "AI" on the Feed tab. Then the extension sends the
+videos in your recommendations to the decision service you pick, OpenAI
+Decisions or TypeSafe Jev, with your own API key: each video's title, what its
+card shows (channel, views, age, length), the channel's subscriber count when
+the extension already knows it, and your description of what is worth your
+time. With "Card and video page" it also sends each video's description, tags,
+category and publish date, which it reads from YouTube first. The service's
+answers are kept in the browser's session storage until you close the browser.
+Your key is stored only in this browser's local extension storage and is sent
+only to that service.
+
 ## Permissions
 
 - `storage`: to save your settings and API keys.
@@ -62,6 +75,9 @@ You can turn summaries off in the popup's General tab.
   only when you ask for summaries to be prepared in advance.
 - `nativeMessaging` (optional, asked for only when you connect a coding agent):
   to talk to the BetterYouTube connector.
+- Access to `https://api.typesafe.ai/*` (optional, asked for only when you pick
+  TypeSafe Jev for the AI mode): its API accepts an extension's requests only
+  with this permission.
 - Access to `https://www.youtube.com/*` through its content scripts. It does
   not run on any other site.
 

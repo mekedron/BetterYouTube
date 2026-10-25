@@ -4,7 +4,10 @@ import { PREPARE_DELAY_MS } from '../components/ai/prepare';
 import type { PrepareMessage } from '../components/ai/prepare';
 import { providerConfig, resolveLanguage } from '../components/ai/providers';
 import { DEFAULT_PROMPT } from '../components/ai/summarize';
-import type { PageResponse, RuntimeMessage, TabInfo } from '../components/protocol';
+import { loadApiKeys } from '../components/ai/secrets';
+import { DEFAULT_CRITERIA, judgeVideos, KEY_SLOT } from '../components/feedAi';
+import type { VideoFacts, Verdicts } from '../components/feedAi';
+import type { JudgeResult, PageResponse, RuntimeMessage, TabInfo } from '../components/protocol';
 import { loadSettings, onSettingsChanged } from '../components/settings';
 
 // Shows how many videos the filter dims or hides in each YouTube tab on the
@@ -35,7 +38,12 @@ export default defineBackground(() => {
     for (const tabId of counts.keys()) draw(tabId);
   }
 
-  browser.runtime.onMessage.addListener((message: RuntimeMessage | PrepareMessage, sender) => {
+  browser.runtime.onMessage.addListener((message: RuntimeMessage | PrepareMessage, sender, sendResponse) => {
+    // Answers through sendResponse, which every browser version supports.
+    if (message?.type === 'judge-videos') {
+      void judge(message.videos).then(sendResponse);
+      return true;
+    }
     const tabId = sender.tab?.id;
     if (message?.type === 'tab-stats' && tabId !== undefined) {
       counts.set(tabId, message.stats.filteredCards);
@@ -55,6 +63,46 @@ export default defineBackground(() => {
     clearTimeout(prepareTimers.get(tabId));
     prepareTimers.delete(tabId);
   });
+
+  // ---- The feed's AI mode (see components/feedAi.ts) ----
+  //
+  // Verdicts are kept for the browser session, per service, criteria and
+  // depth, so a video seen again on another page is not paid for twice.
+
+  const VERDICTS_KEY = 'feed-verdicts';
+  const MAX_VERDICTS = 5000;
+  // One copy in memory, so requests from several tabs at once add to the
+  // same record instead of overwriting each other's.
+  let memory: { print: string; verdicts: Verdicts } | null = null;
+
+  async function remembered(print: string) {
+    if (memory?.print === print) return memory;
+    const stored = (await browser.storage.session.get(VERDICTS_KEY))[VERDICTS_KEY] as typeof memory | undefined;
+    if (memory?.print === print) return memory;
+    memory = stored?.print === print ? stored : { print, verdicts: {} };
+    return memory;
+  }
+
+  async function judge(videos: VideoFacts[]): Promise<JudgeResult> {
+    try {
+      const { feed } = await loadSettings();
+      const key = (await loadApiKeys())[KEY_SLOT[feed.ai.service]] ?? '';
+      const criteria = feed.ai.criteria.trim() || DEFAULT_CRITERIA;
+      const record = await remembered(JSON.stringify([feed.ai.service, feed.ai.depth, criteria]));
+      const missing = videos.filter((v) => !(v.id in record.verdicts));
+      if (missing.length) {
+        Object.assign(record.verdicts, await judgeVideos(feed.ai.service, key, criteria, missing));
+        const ids = Object.keys(record.verdicts);
+        for (const id of ids.slice(0, Math.max(0, ids.length - MAX_VERDICTS))) delete record.verdicts[id];
+        await browser.storage.session.set({ [VERDICTS_KEY]: record });
+      }
+      const verdicts: Verdicts = {};
+      for (const v of videos) if (v.id in record.verdicts) verdicts[v.id] = record.verdicts[v.id];
+      return { ok: true, verdicts };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }
 
   // ---- Getting the built-in model ready (see components/ai/prepare.ts) ----
 

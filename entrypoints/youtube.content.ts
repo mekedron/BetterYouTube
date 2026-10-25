@@ -1,5 +1,25 @@
-import { CONFIG_EVENT, COMMAND_EVENT, HELLO_EVENT, REQUEST_EVENT, RESPONSE_EVENT, STATS_EVENT } from '../components/protocol';
-import type { PageCommand, PageConfig, PageRequest, PageResponse, RuntimeMessage, TabInfo, TabStats } from '../components/protocol';
+import {
+  CONFIG_EVENT,
+  COMMAND_EVENT,
+  HELLO_EVENT,
+  JUDGE_EVENT,
+  REQUEST_EVENT,
+  RESPONSE_EVENT,
+  STATS_EVENT,
+  VERDICTS_EVENT,
+} from '../components/protocol';
+import type {
+  JudgeRequest,
+  JudgeResponse,
+  JudgeResult,
+  PageCommand,
+  PageConfig,
+  PageRequest,
+  PageResponse,
+  RuntimeMessage,
+  TabInfo,
+  TabStats,
+} from '../components/protocol';
 import { loadSettings, onSettingsChanged } from '../components/settings';
 import type { Settings } from '../components/settings';
 
@@ -11,7 +31,7 @@ export default defineContentScript({
   runAt: 'document_start',
   main(ctx) {
     let settings: Settings | null = null;
-    let stats: TabStats = { filteredCards: 0, skippedShorts: 0 };
+    let stats: TabStats = { filteredCards: 0, skippedShorts: 0, aiError: null };
 
     const strings = {
       shortHiddenLikes: browser.i18n.getMessage('pageShortFewLikes'),
@@ -64,6 +84,26 @@ export default defineContentScript({
     };
     document.addEventListener(RESPONSE_EVENT, onResponse);
 
+    // The AI mode's requests go through the background script, which holds
+    // the API key; the page never sees it.
+    const onJudge = (event: Event) => {
+      let request: JudgeRequest;
+      try {
+        request = JSON.parse((event as CustomEvent<string>).detail);
+      } catch {
+        return;
+      }
+      const message: RuntimeMessage = { type: 'judge-videos', videos: request.videos };
+      void browser.runtime
+        .sendMessage(message)
+        .catch((e: unknown) => ({ ok: false, error: e instanceof Error ? e.message : String(e) }))
+        .then((answer) => {
+          const response = { ...(answer as JudgeResult), batchId: request.batchId } as JudgeResponse;
+          document.dispatchEvent(new CustomEvent(VERDICTS_EVENT, { detail: JSON.stringify(response) }));
+        });
+    };
+    document.addEventListener(JUDGE_EVENT, onJudge);
+
     function askPage(type: PageRequest['type']): Promise<PageResponse> {
       const requestId = crypto.randomUUID();
       return new Promise((resolve) => {
@@ -109,6 +149,7 @@ export default defineContentScript({
       document.removeEventListener(HELLO_EVENT, onHello);
       document.removeEventListener(STATS_EVENT, onStats);
       document.removeEventListener(RESPONSE_EVENT, onResponse);
+      document.removeEventListener(JUDGE_EVENT, onJudge);
       browser.runtime.onMessage.removeListener(onMessage);
       document.removeEventListener('yt-navigate-finish', onNavigate);
     });

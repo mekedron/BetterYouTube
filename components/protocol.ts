@@ -1,3 +1,4 @@
+import type { VideoFacts, Verdicts } from './feedAi';
 import type { Settings } from './settings';
 
 // The filter runs in the page's own JavaScript world, because it reads
@@ -17,6 +18,10 @@ export const COMMAND_EVENT = 'betteryoutube:command';
 export const REQUEST_EVENT = 'betteryoutube:request';
 /** Page -> bridge: the answer to a PageRequest, matched by requestId. */
 export const RESPONSE_EVENT = 'betteryoutube:response';
+/** Page -> bridge: videos for the feed's AI mode to judge (see JudgeRequest). */
+export const JUDGE_EVENT = 'betteryoutube:judge';
+/** Bridge -> page: the verdicts for a JudgeRequest, matched by batchId. */
+export const VERDICTS_EVENT = 'betteryoutube:verdicts';
 
 /** Texts the page script shows; the bridge localizes them. */
 export interface PageStrings {
@@ -35,7 +40,18 @@ export interface TabStats {
   filteredCards: number;
   /** Shorts covered in this tab since it was opened. */
   skippedShorts: number;
+  /** Why the feed's AI mode stopped judging videos in this tab, or null. */
+  aiError: string | null;
 }
+
+export interface JudgeRequest {
+  batchId: string;
+  videos: VideoFacts[];
+}
+
+/** The verdicts, or the error that stopped the request ('no-key' when no API key is set). */
+export type JudgeResult = { ok: true; verdicts: Verdicts } | { ok: false; error: string };
+export type JudgeResponse = JudgeResult & { batchId: string };
 
 /** What the popup learns about its tab: the stats, and the video on screen. */
 export interface TabInfo extends TabStats {
@@ -74,4 +90,5 @@ export type RuntimeMessage =
   | { type: 'clear-channel-cache' }
   | { type: 'get-video-context' }
   | { type: 'video-opened'; videoId: string }
-  | { type: 'summary-started'; videoId: string };
+  | { type: 'summary-started'; videoId: string }
+  | { type: 'judge-videos'; videos: VideoFacts[] };

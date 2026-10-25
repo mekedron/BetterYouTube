@@ -2,6 +2,7 @@ import { CONFIG_EVENT, COMMAND_EVENT, HELLO_EVENT, REQUEST_EVENT, RESPONSE_EVENT
 import type { PageCommand, PageConfig, PageRequest, TabStats } from '../components/protocol';
 import { parseCount } from '../components/parseCount';
 import { readVideoContext } from '../components/videoContext';
+import { AiJudge } from '../components/feedAiPage';
 
 // Runs in YouTube's own JavaScript world: it needs `ytcfg`, the data models
 // YouTube keeps on its custom elements, and same-origin innertube requests.
@@ -259,6 +260,31 @@ function startFilter() {
     schedule();
   }
 
+  // ---- AI mode (see components/feedAi.ts) ----
+
+  // The video page's description, tags, category and date: the player
+  // request is about 7 KB, against half a megabyte for the watch page data.
+  async function lookUpVideo(videoId: string) {
+    const data = await innertube('player', { videoId }, { english: true });
+    const details = data.videoDetails ?? {};
+    const micro = data.microformat?.playerMicroformatRenderer ?? {};
+    return {
+      description: String(details.shortDescription ?? '').slice(0, 500),
+      tags: ((details.keywords ?? []) as string[]).slice(0, 10),
+      category: String(micro.category ?? ''),
+      published: String(micro.publishDate ?? '').slice(0, 10),
+    };
+  }
+
+  const aiJudge = new AiJudge({
+    subscribersOf: (card) => {
+      const channelId = channelIdOf(card);
+      return channelId ? (subsCache.get(channelId)?.[0] ?? null) : null;
+    },
+    lookUp: lookUpVideo,
+    changed: schedule,
+  });
+
   // true when the card's channel is known to be below the subscriber minimum.
   // Until the channel's count has loaded, the card stays as it is.
   function isSmallChannel(card: YtElement): boolean {
@@ -288,7 +314,9 @@ function startFilter() {
 
     // Innertube requests need the client context from the page's config.
     const canAsk = Boolean(ytcfg()?.INNERTUBE_CONTEXT);
-    const exempting = feed.exemptSubscriptions && canAsk && (feed.lowViews.enabled || feed.smallChannels.enabled);
+    const ai = feed.mode === 'ai';
+    if (ai) aiJudge.configure(feed.ai);
+    const exempting = feed.exemptSubscriptions && canAsk && (ai || feed.lowViews.enabled || feed.smallChannels.enabled);
     if (exempting && !subscriptionsRequested) {
       subscriptionsRequested = true;
       void loadMySubscriptions();
@@ -302,11 +330,13 @@ function startFilter() {
         card.classList.remove(FILTERED_CLASS);
         continue;
       }
-      if (feed.lowViews.enabled) {
+      if (ai) {
+        filter = aiJudge.filter(card as YtElement) ?? false;
+      } else if (feed.lowViews.enabled) {
         const views = viewsOf(card);
         filter = views !== null && views <= feed.lowViews.maxViews;
       }
-      if (!filter && feed.smallChannels.enabled && canAsk) filter = isSmallChannel(card as YtElement);
+      if (!ai && !filter && feed.smallChannels.enabled && canAsk) filter = isSmallChannel(card as YtElement);
       card.classList.toggle(FILTERED_CLASS, filter);
       // YouTube keeps earlier pages in the DOM, hidden; the count covers
       // only the page on screen.
@@ -492,7 +522,11 @@ function startFilter() {
     if (statsTimer) return;
     statsTimer = window.setTimeout(() => {
       statsTimer = 0;
-      const stats: TabStats = { filteredCards, skippedShorts: skippedShortIds.size };
+      const stats: TabStats = {
+        filteredCards,
+        skippedShorts: skippedShortIds.size,
+        aiError: config?.settings.feed.mode === 'ai' ? aiJudge.error : null,
+      };
       const json = JSON.stringify(stats);
       if (json === lastSentStats) return;
       lastSentStats = json;

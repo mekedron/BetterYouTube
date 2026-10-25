@@ -1,3 +1,6 @@
+import { STRICTNESS_THRESHOLD } from './feedAi';
+import type { FeedAiService, Strictness } from './feedAi';
+
 // Settings live in storage.sync so they follow the viewer between browsers.
 // Each feature owns one top-level section; a new feature adds a section and a
 // default here, and normalizeSettings fills it in for viewers who saved older
@@ -6,10 +9,23 @@
 export interface Settings {
   enabled: boolean;
   feed: {
+    /**
+     * How videos are judged: by the view and channel-size rules, or by a
+     * decision model against the viewer's own criteria (components/feedAi.ts).
+     */
+    mode: 'rules' | 'ai';
     lowViews: { enabled: boolean; maxViews: number };
     smallChannels: { enabled: boolean; minSubscribers: number };
-    /** Videos from channels the viewer subscribes to pass both filters above. */
+    /** Videos from channels the viewer subscribes to pass every filter, in both modes. */
     exemptSubscriptions: boolean;
+    ai: {
+      service: FeedAiService;
+      /** 'card': only what the card shows; 'full': also each video's page data, slower. */
+      depth: 'card' | 'full';
+      /** The viewer's description of a video worth their time; empty means the built-in one. */
+      criteria: string;
+      strictness: Strictness;
+    };
     areas: { home: boolean; watch: boolean; search: boolean };
     action: 'dim' | 'hide';
     hideHomeShorts: boolean;
@@ -51,9 +67,11 @@ const PROVIDER_DEFAULTS: ProviderSettings = { model: '', effort: 'default', base
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   feed: {
+    mode: 'rules',
     lowViews: { enabled: true, maxViews: 50_000 },
     smallChannels: { enabled: true, minSubscribers: 50_000 },
     exemptSubscriptions: true,
+    ai: { service: 'openai', depth: 'card', criteria: '', strictness: 'balanced' },
     areas: { home: true, watch: true, search: false },
     action: 'dim',
     hideHomeShorts: true,
@@ -108,6 +126,10 @@ export function normalizeSettings(saved: unknown): Settings {
   const legacy = (saved as any)?.feed?.smallChannels?.exemptSubscriptions;
   if (typeof legacy === 'boolean' && typeof (saved as any)?.feed?.exemptSubscriptions !== 'boolean') s.feed.exemptSubscriptions = legacy;
   if (s.feed.action !== 'dim' && s.feed.action !== 'hide') s.feed.action = 'dim';
+  if (s.feed.mode !== 'rules' && s.feed.mode !== 'ai') s.feed.mode = 'rules';
+  if (s.feed.ai.service !== 'openai' && s.feed.ai.service !== 'jev') s.feed.ai.service = 'openai';
+  if (s.feed.ai.depth !== 'card' && s.feed.ai.depth !== 'full') s.feed.ai.depth = 'card';
+  if (!(s.feed.ai.strictness in STRICTNESS_THRESHOLD)) s.feed.ai.strictness = 'balanced';
   if (!['unasked', 'granted', 'declined'].includes(s.ai.consent)) s.ai.consent = 'unasked';
   if (!['off', 'model', 'summary'].includes(s.ai.prepare)) s.ai.prepare = 'off';
   return s;

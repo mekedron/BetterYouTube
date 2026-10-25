@@ -361,5 +361,71 @@
   },
   "aiPrepareSummaryHint": {
     "message": "Если видео открыто дольше 3 секунд, модель пишет пересказ, и окно открывается уже с ним. Зато модель работает на каждом таком видео, даже если пересказ вам не нужен."
+  },
+  "feedModeTitle": {
+    "message": "Как оценивать видео"
+  },
+  "feedModeRules": {
+    "message": "Правила"
+  },
+  "feedModeAi": {
+    "message": "AI"
+  },
+  "feedModeRulesHint": {
+    "message": "По просмотрам и размеру канала. Бесплатно, и ничего не уходит из браузера."
+  },
+  "feedModeAiHint": {
+    "message": "AI-модель читает карточку каждого видео и сравнивает его с тем, что вы считаете стоящим. Работает с вашим API-ключом."
+  },
+  "feedAiService": {
+    "message": "Сервис"
+  },
+  "feedAiKeyHint": {
+    "message": "Хранится только в этом браузере. В {name} уходят только названия и данные видео из вашей ленты."
+  },
+  "feedAiAllow": {
+    "message": "Разрешить доступ к api.typesafe.ai"
+  },
+  "feedAiAllowHint": {
+    "message": "API Jev принимает запросы от расширения только с этим разрешением."
+  },
+  "feedAiDepth": {
+    "message": "Что видит AI"
+  },
+  "feedAiDepthCard": {
+    "message": "Карточку"
+  },
+  "feedAiDepthFull": {
+    "message": "Карточку и страницу видео"
+  },
+  "feedAiDepthCardHint": {
+    "message": "Быстро. Название, канал, просмотры, возраст и длительность, как на карточке."
+  },
+  "feedAiDepthFullHint": {
+    "message": "Медленнее. Ещё описание, теги, категория и дата каждого видео: расширение сначала запрашивает их у YouTube. Лайков нет: YouTube отдаёт их только вместе со всей страницей видео."
+  },
+  "feedAiCriteria": {
+    "message": "Что стоит вашего времени"
+  },
+  "feedAiCriteriaHint": {
+    "message": "AI сравнивает с этим описанием каждое видео в ленте."
+  },
+  "feedAiStrictness": {
+    "message": "Строгость"
+  },
+  "feedAiLenient": {
+    "message": "Мягко"
+  },
+  "feedAiBalanced": {
+    "message": "Средне"
+  },
+  "feedAiStrict": {
+    "message": "Строго"
+  },
+  "statusAiNoKey": {
+    "message": "AI-режиму нужен API-ключ. Добавьте его на вкладке «Лента»."
+  },
+  "statusAiError": {
+    "message": "AI-режим остановился: {error}. Измените настройку или перезагрузите YouTube, чтобы попробовать снова."
   }
 }

@@ -8,6 +8,7 @@
   import type { RuntimeMessage, TabInfo } from '../../components/protocol';
   import { loadSettings, saveSettings } from '../../components/settings';
   import type { Settings } from '../../components/settings';
+  import FeedAiSettings from './FeedAiSettings.svelte';
   import StepSlider from './StepSlider.svelte';
   import ProviderSettings from './ProviderSettings.svelte';
   import Summary from './Summary.svelte';
@@ -146,6 +147,12 @@
     {/if}
   </header>
 
+  {#if settings?.enabled && settings.feed.mode === 'ai' && stats?.aiError}
+    <div class="ai-error">
+      {stats.aiError === 'no-key' ? t('statusAiNoKey') : t('statusAiError', undefined, { error: stats.aiError })}
+    </div>
+  {/if}
+
   {#if settings?.enabled && stats && (stats.filteredCards > 0 || stats.skippedShorts > 0)}
     <div class="stats">
       <div class="stat">
@@ -192,6 +199,26 @@
     <div class="body" class:dimmed={!settings.enabled && tab !== 'general'} inert={!settings.enabled && tab !== 'general'} role="tabpanel">
       {#if tab === 'feed'}
         <div class="card">
+          <div class="row stacked">
+            <div class="title">{t('feedModeTitle')}</div>
+            <div class="segmented" role="radiogroup" aria-label={t('feedModeTitle')}>
+              <label><input type="radio" bind:group={settings.feed.mode} value="rules" />{t('feedModeRules')}</label>
+              <label><input type="radio" bind:group={settings.feed.mode} value="ai" />{t('feedModeAi')}</label>
+            </div>
+            <div class="hint">{settings.feed.mode === 'rules' ? t('feedModeRulesHint') : t('feedModeAiHint')}</div>
+          </div>
+        </div>
+
+        {#if settings.feed.mode === 'ai'}
+          <div class="card">
+            <FeedAiSettings bind:settings bind:keys />
+            <label class="check exempt">
+              <input type="checkbox" bind:checked={settings.feed.exemptSubscriptions} />
+              <span>{t('exemptSubscriptions')}</span>
+            </label>
+          </div>
+        {:else}
+        <div class="card">
           <div class="row">
             <div class="text">
               <div class="title">{t('lowViewsTitle')}</div>
@@ -232,6 +259,7 @@
             </label>
           {/if}
         </div>
+        {/if}
 
         <div class="card">
           <div class="row stacked">
@@ -496,6 +524,13 @@
     opacity: 0.45;
   }
 
+  .ai-error {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font: 400 12.5px/1.4 var(--font);
+  }
   .card {
     border-radius: 14px;
     background: var(--panel);

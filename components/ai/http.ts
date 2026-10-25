@@ -35,7 +35,11 @@ export async function ensureOk(response: Response): Promise<void> {
   let detail = '';
   try {
     const body = await response.json();
-    detail = body?.error?.message ?? body?.message ?? (typeof body?.error === 'string' ? body.error : '');
+    detail =
+      body?.error?.message ??
+      body?.message ??
+      body?.detail?.message ??
+      (typeof body?.error === 'string' ? body.error : typeof body?.detail === 'string' ? body.detail : '');
   } catch {}
   throw new ProviderError(`${response.status}${detail ? `: ${detail}` : ` ${response.statusText}`}`);
 }

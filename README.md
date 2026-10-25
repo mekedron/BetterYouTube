@@ -30,6 +30,14 @@ Website and live demo: <https://mekedron.github.io/BetterYouTube/>
   YouTube once per channel and keeps the answer for a week.
 - **Your subscriptions.** Videos from channels you subscribe to are never
   dimmed by either filter above. A checkbox turns this off.
+- **AI mode for the feed.** Instead of the two rules, a decision model judges
+  each video against your own description of what is worth your time:
+  [OpenAI Decisions](https://developers.openai.com/api/docs/guides/decisions)
+  or [TypeSafe Jev](https://docs.typesafe.ai/introduction), with your API key.
+  One request covers a batch of up to 30 cards. "The card" sends what the card
+  shows; "Card and video page" also reads each video's description, tags,
+  category and date from YouTube first, which is slower. Verdicts are kept for
+  the browser session, so a video is judged once.
 - **Shorts.** Hides Shorts shelves on Home. In the Shorts player it covers,
   mutes and pauses a Short with fewer likes than you set (1K by default), so you
   scroll past it.
