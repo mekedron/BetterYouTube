@@ -427,5 +427,8 @@
   },
   "statusAiError": {
     "message": "The AI mode stopped: {error}. Change a setting or reload YouTube to try again."
+  },
+  "ollamaOrigins": {
+    "message": "Ollama answers browser extensions only when OLLAMA_ORIGINS allows them. On a Mac, run this in Terminal, then quit and reopen Ollama. On Linux, set the same variable for the ollama service."
   }
 }

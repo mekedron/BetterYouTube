@@ -33,6 +33,11 @@
   let models = $state<string[]>([]);
   let modelsState = $state<'idle' | 'loading' | 'failed'>('idle');
   let modelsError = $state('');
+  // fetch() fails with a TypeError, not an HTTP status, when a server refuses
+  // the extension's origin, as Ollama does unless OLLAMA_ORIGINS allows it.
+  let modelsUnreachable = $state(false);
+  const OLLAMA_COMMAND = 'launchctl setenv OLLAMA_ORIGINS "chrome-extension://*,moz-extension://*"';
+  const isLocal = $derived(/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test(settings.ai.providers.custom.baseUrl));
   let keyTimer = 0;
 
   // ---- Coding agent ----
@@ -62,6 +67,7 @@
     const config = providerConfig(settings, keys, id);
     if (!provider.listModels || (provider.needsKey && !config.apiKey)) return;
     modelsState = 'loading';
+    modelsUnreachable = false;
     try {
       models = await provider.listModels(config);
       modelsState = 'idle';
@@ -69,6 +75,7 @@
     } catch (e) {
       modelsState = 'failed';
       modelsError = e instanceof Error ? e.message : String(e);
+      modelsUnreachable = e instanceof TypeError;
     }
   }
 
@@ -101,8 +108,8 @@
     if (await requestConnectorPermission()) await refreshAgents(true);
   }
 
-  async function copyCommand() {
-    await navigator.clipboard.writeText(command);
+  async function copyCommand(text = command) {
+    await navigator.clipboard.writeText(text);
     copied = true;
     setTimeout(() => (copied = false), 1500);
   }
@@ -132,7 +139,7 @@
     </div>
     <div class="command">
       <code>{command}</code>
-      <button type="button" class="link" onclick={copyCommand}>{copied ? t('agentCopied') : t('agentCopy')}</button>
+      <button type="button" class="link" onclick={() => copyCommand()}>{copied ? t('agentCopied') : t('agentCopy')}</button>
     </div>
     <button type="button" class="ghost" disabled={checking} onclick={() => refreshAgents(true)}>
       {checking ? t('agentChecking') : t('agentCheck')}
@@ -201,6 +208,14 @@
   </div>
   {#if modelsState === 'loading'}<div class="hint">{t('modelsLoading')}</div>{/if}
   {#if modelsState === 'failed'}<div class="hint error">{t('modelsFailed', undefined, { error: modelsError })}</div>{/if}
+  {#if modelsState === 'failed' && modelsUnreachable && id === 'custom' && isLocal}
+    <div class="hint">{t('ollamaOrigins')}</div>
+    <div class="command">
+      <code>{OLLAMA_COMMAND}</code>
+      <button type="button" class="link" onclick={() => copyCommand(OLLAMA_COMMAND)}>{copied ? t('agentCopied') : t('agentCopy')}</button>
+    </div>
+    <button type="button" class="ghost" onclick={loadModels}>{t('agentCheck')}</button>
+  {/if}
 {/if}
 
 {#if id !== 'chrome-builtin' && (id !== 'agent' || (detection?.ok && detection.agents.length))}
